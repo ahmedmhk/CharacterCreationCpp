@@ -1,0 +1,911 @@
+{
+	"folders": [
+		{
+			"name": "CharacterCreationCpp",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off",
+		"terminal.integrated.env.linux": {
+			"PATH": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+			"DOTNET_ROOT": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+			"DOTNET_HOST_PATH": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+			"DOTNET_MULTILEVEL_LOOKUP": "0",
+			"DOTNET_ROLL_FORWARD": "LatestMajor"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "CharacterCreationCpp Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp Linux Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp Linux Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp Linux Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"Linux",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp LinuxArm64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp LinuxArm64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp LinuxArm64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp LinuxArm64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Test",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCpp LinuxArm64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCpp LinuxArm64 Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCpp",
+					"LinuxArm64",
+					"Shipping",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCppEditor Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Debug",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCppEditor Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"DebugGame",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CharacterCreationCppEditor Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"label": "CharacterCreationCppEditor Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CharacterCreationCppEditor",
+					"Linux",
+					"Development",
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch CharacterCreationCpp (Debug)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/Binaries/Linux/UnrealGame-Linux-Debug",
+				"preLaunchTask": "CharacterCreationCpp Linux Debug Build",
+				"args": [
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCpp (DebugGame)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/Binaries/Linux/UnrealGame-Linux-DebugGame",
+				"preLaunchTask": "CharacterCreationCpp Linux DebugGame Build",
+				"args": [
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCpp (Development)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/Binaries/Linux/UnrealGame",
+				"preLaunchTask": "CharacterCreationCpp Linux Development Build",
+				"args": [
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCpp (Test)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/Binaries/Linux/UnrealGame-Linux-Test",
+				"preLaunchTask": "CharacterCreationCpp Linux Test Build",
+				"args": [
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCpp (Shipping)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/Binaries/Linux/UnrealGame-Linux-Shipping",
+				"preLaunchTask": "CharacterCreationCpp Linux Shipping Build",
+				"args": [
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCppEditor (Debug)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/Linux/UnrealEditor-Linux-Debug",
+				"preLaunchTask": "CharacterCreationCppEditor Linux Debug Build",
+				"args": [
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject"
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCppEditor (DebugGame)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/Linux/UnrealEditor-Linux-DebugGame",
+				"preLaunchTask": "CharacterCreationCppEditor Linux DebugGame Build",
+				"args": [
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject"
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Launch CharacterCreationCppEditor (Development)",
+				"request": "launch",
+				"program": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/Linux/UnrealEditor",
+				"preLaunchTask": "CharacterCreationCppEditor Linux Development Build",
+				"args": [
+					"/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject"
+				],
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0",
+				"type": "cppdbg",
+				"visualizerFile": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CharacterCreationCpp": "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp",
+					"/UEVFS/Root": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+				}
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Linux Development Build",
+				"program": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Build/BatchFiles/RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-project=/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject",
+					"-game",
+					"-engine",
+					"-dotnet"
+				],
+				"env": {
+					"PATH": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+					"DOTNET_ROOT": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+					"DOTNET_HOST_PATH": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+					"DOTNET_MULTILEVEL_LOOKUP": "0",
+					"DOTNET_ROLL_FORWARD": "LatestMajor"
+				},
+				"console": "internalConsole",
+				"internalConsoleOptions": "openOnSessionStart",
+				"stopAtEntry": false,
+				"cwd": "/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0"
+			}
+		]
+	}
+}
