@@ -694,22 +694,26 @@ UInputMappingContext* USpriteSheetProcessor::CreateInputMappingContext(const FSt
 	FEnhancedActionKeyMapping& WASDForward = Mappings.AddDefaulted_GetRef();
 	WASDForward.Action = MoveAction;
 	WASDForward.Key = EKeys::W;
-	WASDForward.Modifiers.Add(NewObject<UInputModifierSwizzleAxis>());
-	static_cast<UInputModifierSwizzleAxis*>(WASDForward.Modifiers.Last())->Order = EInputAxisSwizzle::YXZ;
+	UInputModifierSwizzleAxis* WSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
+	WSwizzle->Order = EInputAxisSwizzle::YXZ;
+	WASDForward.Modifiers.Add(WSwizzle);
 
 	// WASD Backward (S key)  
 	FEnhancedActionKeyMapping& WASDBackward = Mappings.AddDefaulted_GetRef();
 	WASDBackward.Action = MoveAction;
 	WASDBackward.Key = EKeys::S;
-	WASDBackward.Modifiers.Add(NewObject<UInputModifierNegate>());
-	WASDBackward.Modifiers.Add(NewObject<UInputModifierSwizzleAxis>());
-	static_cast<UInputModifierSwizzleAxis*>(WASDBackward.Modifiers.Last())->Order = EInputAxisSwizzle::YXZ;
+	UInputModifierSwizzleAxis* SSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
+	SSwizzle->Order = EInputAxisSwizzle::YXZ;
+	UInputModifierNegate* SNegate = NewObject<UInputModifierNegate>(NewMappingContext);
+	WASDBackward.Modifiers.Add(SSwizzle);
+	WASDBackward.Modifiers.Add(SNegate);
 
 	// WASD Left (A key)
 	FEnhancedActionKeyMapping& WASDLeft = Mappings.AddDefaulted_GetRef();
 	WASDLeft.Action = MoveAction;
 	WASDLeft.Key = EKeys::A;
-	WASDLeft.Modifiers.Add(NewObject<UInputModifierNegate>());
+	UInputModifierNegate* ANegate = NewObject<UInputModifierNegate>(NewMappingContext);
+	WASDLeft.Modifiers.Add(ANegate);
 
 	// WASD Right (D key)
 	FEnhancedActionKeyMapping& WASDRight = Mappings.AddDefaulted_GetRef();
