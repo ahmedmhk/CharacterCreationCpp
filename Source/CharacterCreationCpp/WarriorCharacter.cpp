@@ -62,6 +62,9 @@ AWarriorCharacter::AWarriorCharacter()
     // This will work if assets exist, otherwise BeginPlay() will handle it
     TryLoadAnimationsForEditor();
     
+    // Set default input assets as UPROPERTY values for Blueprint editor
+    TryLoadInputAssetsForEditor();
+    
     // Check if command is already registered, don't register if it exists
     if (!IConsoleManager::Get().FindConsoleObject(TEXT("ProcessSpriteSheet")))
     {
@@ -91,8 +94,7 @@ void AWarriorCharacter::BeginPlay()
         UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
         if (Subsystem)
         {
-            // Load Input Mapping Context from created assets
-            DefaultMappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
+            // Use DefaultMappingContext that was loaded in constructor (if available)
             if (DefaultMappingContext)
             {
                 Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -100,17 +102,15 @@ void AWarriorCharacter::BeginPlay()
             }
             else
             {
-                UE_LOG(LogCharacterCreation, Warning, TEXT("✗ Failed to load Input Mapping Context: IMC_PlayerInput"));
+                UE_LOG(LogCharacterCreation, Warning, TEXT("✗ DefaultMappingContext is null - not loaded in constructor"));
             }
         }
     }
 
-    // Load Input Actions
-    MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
-    AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
-
-    UE_LOG(LogCharacterCreation, Warning, TEXT("MoveAction loaded: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackAction loaded: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
+    // Input actions should already be loaded in constructor, log their status
+    UE_LOG(LogCharacterCreation, Warning, TEXT("BeginPlay - Input Actions Status:"));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
     
     // Load animations in BeginPlay if not already loaded in constructor
     if (!IdleAnimation)
@@ -399,4 +399,20 @@ void AWarriorCharacter::TryLoadAnimationsForEditor()
             SpriteComponent ? TEXT("Valid") : TEXT("NULL"),
             IdleAnimation ? TEXT("Valid") : TEXT("NULL"));
     }
+}
+
+void AWarriorCharacter::TryLoadInputAssetsForEditor()
+{
+    UE_LOG(LogCharacterCreation, Warning, TEXT("=== TryLoadInputAssetsForEditor() called in constructor ==="));
+    
+    // Try to load input assets for editor display (will silently fail if assets don't exist yet)
+    DefaultMappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
+    MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
+    AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
+    
+    // Log what was loaded
+    UE_LOG(LogCharacterCreation, Warning, TEXT("Constructor loaded input assets:"));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("- DefaultMappingContext: %s"), DefaultMappingContext ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("- MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("- AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
 }

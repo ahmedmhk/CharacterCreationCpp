@@ -148,6 +148,7 @@ protected:
     void LoadAnimations();
     void LoadAndAssignAnimations();
     void TryLoadAnimationsForEditor();
+    void TryLoadInputAssetsForEditor();
 
 private:
     UPaperFlipbookComponent* SpriteComponent;
