@@ -11,6 +11,12 @@ public class CharacterCreationCpp : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "Paper2D", "GameplayTags" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "UnrealEd", "EditorStyle", "EditorWidgets", "ToolMenus", "AssetRegistry", "ContentBrowser", "EditorSubsystem", "RenderCore", "ImageWrapper" });
+		
+		// Add dependencies required for commandlets
+		if (Target.Type == TargetType.Editor || Target.Type == TargetType.Program)
+		{
+			PrivateDependencyModuleNames.AddRange(new string[] { "ToolMenus", "Slate", "SlateCore" });
+		}
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
