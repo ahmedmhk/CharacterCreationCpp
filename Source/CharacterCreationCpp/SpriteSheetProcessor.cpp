@@ -53,7 +53,7 @@ bool USpriteSheetProcessor::ProcessSpriteSheet(const FString& TextureName, const
 		return false;
 	}
 
-	TArray<UPaperFlipbook*> CreatedAnimations = CreateAnimations(ExtractedSprites, SpriteInfo);
+	TArray<UPaperFlipbook*> CreatedAnimations = CreateAnimations(ExtractedSprites, SpriteInfo, TextureName);
 	if (CreatedAnimations.Num() == 0)
 	{
 		UE_LOG(LogCharacterCreation, Error, TEXT("Failed to create animations from sprites"));
@@ -383,7 +383,7 @@ TArray<UPaperSprite*> USpriteSheetProcessor::ExtractSprites(UTexture2D* Texture,
 	return ExtractedSprites;
 }
 
-TArray<UPaperFlipbook*> USpriteSheetProcessor::CreateAnimations(const TArray<UPaperSprite*>& Sprites, const FSpriteSheetInfo& SpriteInfo)
+TArray<UPaperFlipbook*> USpriteSheetProcessor::CreateAnimations(const TArray<UPaperSprite*>& Sprites, const FSpriteSheetInfo& SpriteInfo, const FString& CharacterName)
 {
 	TArray<UPaperFlipbook*> CreatedAnimations;
 
@@ -398,7 +398,7 @@ TArray<UPaperFlipbook*> USpriteSheetProcessor::CreateAnimations(const TArray<UPa
 	for (int32 Row = 0; Row < SpriteInfo.Rows; Row++)
 	{
 		EAnimationType AnimType = static_cast<EAnimationType>(Row);
-		FString AnimationName = GetAnimationName(AnimType);
+		FString AnimationName = GetAnimationName(AnimType, CharacterName);
 		FString PackagePath = FString::Printf(TEXT("/Game/Animations/%s"), *AnimationName);
 		
 		UPackage* FlipbookPackage = CreatePackage(*PackagePath);
@@ -478,29 +478,47 @@ TArray<UPaperFlipbook*> USpriteSheetProcessor::CreateAnimations(const TArray<UPa
 	return CreatedAnimations;
 }
 
-FString USpriteSheetProcessor::GetAnimationName(EAnimationType AnimType) const
+FString USpriteSheetProcessor::GetAnimationName(EAnimationType AnimType, const FString& CharacterName) const
 {
+	FString BaseAnimName;
 	switch (AnimType)
 	{
 		case EAnimationType::Idle:
-			return TEXT("Idle");
+			BaseAnimName = TEXT("Idle");
+			break;
 		case EAnimationType::Move:
-			return TEXT("Move");
+			BaseAnimName = TEXT("Move");
+			break;
 		case EAnimationType::AttackSideways:
-			return TEXT("AttackSideways");
+			BaseAnimName = TEXT("AttackSideways");
+			break;
 		case EAnimationType::AttackSideways2:
-			return TEXT("AttackSideways2");
+			BaseAnimName = TEXT("AttackSideways2");
+			break;
 		case EAnimationType::AttackDownwards:
-			return TEXT("AttackDownwards");
+			BaseAnimName = TEXT("AttackDownwards");
+			break;
 		case EAnimationType::AttackDownwards2:
-			return TEXT("AttackDownwards2");
+			BaseAnimName = TEXT("AttackDownwards2");
+			break;
 		case EAnimationType::AttackUpwards:
-			return TEXT("AttackUpwards");
+			BaseAnimName = TEXT("AttackUpwards");
+			break;
 		case EAnimationType::AttackUpwards2:
-			return TEXT("AttackUpwards2");
+			BaseAnimName = TEXT("AttackUpwards2");
+			break;
 		default:
-			return TEXT("Unknown");
+			BaseAnimName = TEXT("Unknown");
+			break;
 	}
+	
+	// If character name is provided, append it to make unique animation names
+	if (!CharacterName.IsEmpty())
+	{
+		return FString::Printf(TEXT("%s_%s"), *BaseAnimName, *CharacterName);
+	}
+	
+	return BaseAnimName;
 }
 
 UTexture2D* USpriteSheetProcessor::CreateSpriteTexture(uint8* SourceData, int32 SourceWidth, int32 SourceHeight, 

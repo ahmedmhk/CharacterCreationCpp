@@ -4,7 +4,6 @@
 #include "PaperFlipbookComponent.h"
 #include "Engine/Engine.h"
 #include "TimerManager.h"
-#include "SpriteProcessorCommand.h"
 #include "HAL/IConsoleManager.h"
 
 AWarriorCharacter::AWarriorCharacter()
@@ -64,23 +63,6 @@ AWarriorCharacter::AWarriorCharacter()
     
     // Set default input assets as UPROPERTY values for Blueprint editor
     TryLoadInputAssetsForEditor();
-    
-    // Check if command is already registered, don't register if it exists
-    if (!IConsoleManager::Get().FindConsoleObject(TEXT("ProcessSpriteSheet")))
-    {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("FALLBACK: ProcessSpriteSheet command not found, registering from WarriorCharacter constructor"));
-        IConsoleManager::Get().RegisterConsoleCommand(
-            TEXT("ProcessSpriteSheet"),
-            TEXT("Process the Warrior_Blue sprite sheet. Usage: ProcessSpriteSheet"),
-            FConsoleCommandWithArgsDelegate::CreateStatic(FSpriteProcessorCommand::ProcessSpriteSheet),
-            ECVF_Default
-        );
-        UE_LOG(LogCharacterCreation, Warning, TEXT("FALLBACK: ProcessSpriteSheet console command registered successfully"));
-    }
-    else
-    {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("ProcessSpriteSheet command already exists, skipping fallback registration"));
-    }
 }
 
 void AWarriorCharacter::BeginPlay()
@@ -116,7 +98,7 @@ void AWarriorCharacter::BeginPlay()
     if (!IdleAnimation)
     {
         UE_LOG(LogCharacterCreation, Warning, TEXT("Animations not loaded in constructor, loading in BeginPlay"));
-        LoadAndAssignAnimations();
+        LoadAnimationsForCharacter();
     }
     else
     {
@@ -140,9 +122,9 @@ void AWarriorCharacter::BeginPlay()
     }
 }
 
-void AWarriorCharacter::LoadAndAssignAnimations()
+void AWarriorCharacter::LoadAnimationsForCharacter()
 {
-    UE_LOG(LogCharacterCreation, Warning, TEXT("=== LoadAndAssignAnimations() called - Loading and assigning all 8 animations ==="));
+    UE_LOG(LogCharacterCreation, Warning, TEXT("=== LoadAnimationsForCharacter() called - Loading and assigning all 8 animations ==="));
     
     // Load and assign primary animation assets directly to UPROPERTY variables
     IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle"));
@@ -192,6 +174,12 @@ void AWarriorCharacter::LoadAndAssignAnimations()
         
         GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Animation Assignment: %d/8 Complete"), AssignedCount));
     }
+}
+
+void AWarriorCharacter::LoadAndAssignAnimations()
+{
+    // Legacy function - now just calls LoadAnimationsForCharacter for backward compatibility
+    LoadAnimationsForCharacter();
 }
 
 void AWarriorCharacter::LoadAnimations()

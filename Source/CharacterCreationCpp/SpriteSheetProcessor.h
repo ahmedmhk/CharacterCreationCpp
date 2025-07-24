@@ -71,7 +71,7 @@ public:
 	TArray<UPaperSprite*> ExtractSprites(UTexture2D* Texture, const FSpriteSheetInfo& SpriteInfo);
 
 	UFUNCTION(BlueprintCallable, Category = "Sprite Processing")
-	TArray<UPaperFlipbook*> CreateAnimations(const TArray<UPaperSprite*>& Sprites, const FSpriteSheetInfo& SpriteInfo);
+	TArray<UPaperFlipbook*> CreateAnimations(const TArray<UPaperSprite*>& Sprites, const FSpriteSheetInfo& SpriteInfo, const FString& CharacterName = TEXT(""));
 
 	UFUNCTION(BlueprintCallable, Category = "Input Creation")
 	UInputAction* CreateInputAction(const FString& ActionName, const FString& PackagePath);
@@ -80,7 +80,7 @@ public:
 	UInputMappingContext* CreateInputMappingContext(const FString& ContextName, const FString& PackagePath, UInputAction* MoveAction, UInputAction* AttackAction);
 
 private:
-	FString GetAnimationName(EAnimationType AnimType) const;
+	FString GetAnimationName(EAnimationType AnimType, const FString& CharacterName = TEXT("")) const;
 	UTexture2D* CreateSpriteTexture(uint8* SourceData, int32 SourceWidth, int32 SourceHeight, 
 		int32 StartX, int32 StartY, int32 SpriteWidth, int32 SpriteHeight, int32 BytesPerPixel, const FString& SpriteName);
 	

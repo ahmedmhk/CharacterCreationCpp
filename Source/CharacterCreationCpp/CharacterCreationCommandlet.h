@@ -16,8 +16,20 @@ public:
 	virtual int32 Main(const FString& Params) override;
 
 private:
+	// Single sprite processing
 	bool ProcessSpriteSheetFromCommandline(const FString& TextureName, const FSpriteSheetInfo& SpriteInfo);
+	
+	// Batch processing
+	bool BatchProcessSpriteSheets(const FSpriteSheetInfo& SpriteInfo, bool bCreateCharacters);
+	
+	// Character generation
+	bool GenerateCharacterClass(const FString& CharacterName, const FString& TextureName);
+	bool WriteCharacterHeaderFile(const FString& CharacterName, const FString& TextureName);
+	bool WriteCharacterSourceFile(const FString& CharacterName, const FString& TextureName);
+	
+	// Utility
 	void PrintUsage() const;
 	void PrintSuccess(const FString& TextureName) const;
 	void PrintFailure(const FString& TextureName) const;
+	void PrintBatchSummary(const TArray<FString>& ProcessedTextures, const TArray<FString>& GeneratedCharacters) const;
 };

@@ -27,6 +27,9 @@ public:
 protected:
     virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    
+    // Virtual method for derived classes to override
+    virtual void LoadAnimationsForCharacter();
 
     // Animation references - editable in Blueprint defaults
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
