@@ -156,7 +156,7 @@ UTexture2D* USpriteSheetProcessor::ImportTexture(const FString& RawAssetPath, co
 	NewTexture->Filter = TF_Nearest;
 	NewTexture->MipGenSettings = TMGS_NoMipmaps;
 	NewTexture->CompressionSettings = TC_VectorDisplacementmap;
-	NewTexture->SRGB = false;
+	NewTexture->SRGB = true;
 	NewTexture->LODGroup = TEXTUREGROUP_World;
 	NewTexture->MaxTextureSize = 0;
 	NewTexture->PowerOfTwoMode = ETexturePowerOfTwoSetting::None;
@@ -206,7 +206,7 @@ bool USpriteSheetProcessor::ApplyPaper2DTextureSettings(UTexture2D* Texture)
 	Texture->Filter = TF_Nearest;
 	Texture->MipGenSettings = TMGS_NoMipmaps;
 	Texture->CompressionSettings = TC_VectorDisplacementmap; // No compression, preserves exact size
-	Texture->SRGB = false;
+	Texture->SRGB = true;
 	Texture->LODGroup = TEXTUREGROUP_World; // No size restrictions
 	Texture->MaxTextureSize = 0; // No max size limit
 	Texture->PowerOfTwoMode = ETexturePowerOfTwoSetting::None; // Allow non-power-of-2
@@ -581,7 +581,7 @@ UTexture2D* USpriteSheetProcessor::CreateSpriteTexture(uint8* SourceData, int32 
 	NewTexture->Filter = TF_Nearest;
 	NewTexture->MipGenSettings = TMGS_NoMipmaps;
 	NewTexture->CompressionSettings = TC_EditorIcon;
-	NewTexture->SRGB = false;
+	NewTexture->SRGB = true;
 	NewTexture->LODGroup = TEXTUREGROUP_Pixels2D;
 	NewTexture->MaxTextureSize = 0;
 	NewTexture->PowerOfTwoMode = ETexturePowerOfTwoSetting::None;
