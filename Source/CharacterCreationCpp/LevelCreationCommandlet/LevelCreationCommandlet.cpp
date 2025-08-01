@@ -17,6 +17,9 @@
 #include "Misc/Parse.h"
 #include "Editor/EditorEngine.h"
 #include "Editor.h"
+#include "Engine/StaticMeshActor.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 
 // Include headers for atmosphere actors
 #include "Atmosphere/AtmosphericFog.h"
@@ -193,6 +196,15 @@ bool ULevelCreationCommandlet::SpawnEnvironmentalActors(UWorld* World)
 	}
 	UE_LOG(LogLevelCreation, Warning, TEXT("✓ Exponential Height Fog spawned"));
 
+	// 6. Spawn Plane Actor (Ground)
+	AStaticMeshActor* PlaneActor = SpawnPlaneActor(World);
+	if (!PlaneActor)
+	{
+		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn Plane Actor"));
+		return false;
+	}
+	UE_LOG(LogLevelCreation, Warning, TEXT("✓ Plane Actor spawned"));
+
 	return true;
 }
 
@@ -350,6 +362,49 @@ AExponentialHeightFog* ULevelCreationCommandlet::SpawnExponentialHeightFog(UWorl
 	return HeightFog;
 }
 
+AStaticMeshActor* ULevelCreationCommandlet::SpawnPlaneActor(UWorld* World)
+{
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// Spawn the static mesh actor at origin
+	AStaticMeshActor* PlaneActor = World->SpawnActor<AStaticMeshActor>(
+		AStaticMeshActor::StaticClass(),
+		FVector::ZeroVector,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	if (PlaneActor)
+	{
+		UStaticMeshComponent* MeshComponent = PlaneActor->GetStaticMeshComponent();
+		if (MeshComponent)
+		{
+			// Load the built-in plane mesh
+			UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
+			if (PlaneMesh)
+			{
+				MeshComponent->SetStaticMesh(PlaneMesh);
+				
+				// Set the scale to 8x8x8
+				PlaneActor->SetActorScale3D(FVector(8.0f, 8.0f, 8.0f));
+				
+				// Ensure proper collision and physics settings
+				MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				MeshComponent->SetCollisionResponseToAllChannels(ECR_Block);
+			}
+			else
+			{
+				UE_LOG(LogLevelCreation, Error, TEXT("Failed to load plane mesh"));
+				World->DestroyActor(PlaneActor);
+				return nullptr;
+			}
+		}
+	}
+
+	return PlaneActor;
+}
+
 bool ULevelCreationCommandlet::SaveLevel(UWorld* World, const FString& PackageName)
 {
 	if (!World)
@@ -443,6 +498,7 @@ void ULevelCreationCommandlet::PrintSuccess(const FString& MapName, const FStrin
 	UE_LOG(LogLevelCreation, Warning, TEXT("🌌 Sky Atmosphere"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("☁️  Volumetric Cloud"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("🌫️  Exponential Height Fog"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("🏗️  Plane Static Mesh (Ground) - Scale: 8x8x8"));
 	UE_LOG(LogLevelCreation, Warning, TEXT(""));
 	UE_LOG(LogLevelCreation, Warning, TEXT("📋 Open the level in the Unreal Editor to see your new environment!"));
 }
@@ -479,6 +535,7 @@ void ULevelCreationCommandlet::PrintDryRunSummary(const FString& MapName, const 
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Sky Atmosphere"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Volumetric Cloud"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Exponential Height Fog"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("  • Plane Static Mesh (Ground) - Scale: 8x8x8"));
 	UE_LOG(LogLevelCreation, Warning, TEXT(""));
 	UE_LOG(LogLevelCreation, Warning, TEXT("No files have been created or modified."));
 	UE_LOG(LogLevelCreation, Warning, TEXT("Remove -dryrun flag to execute these operations."));

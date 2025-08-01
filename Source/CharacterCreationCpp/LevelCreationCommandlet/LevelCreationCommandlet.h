@@ -26,6 +26,7 @@ private:
 	class ASkyAtmosphere* SpawnSkyAtmosphere(class UWorld* World);
 	class AVolumetricCloud* SpawnVolumetricCloud(class UWorld* World);
 	class AExponentialHeightFog* SpawnExponentialHeightFog(class UWorld* World);
+	class AStaticMeshActor* SpawnPlaneActor(class UWorld* World);
 	
 	// Utility
 	void PrintUsage() const;
