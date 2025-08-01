@@ -2,8 +2,8 @@
 
 #include "CharacterCreationCpp.h"
 #include "Modules/ModuleManager.h"
-#include "CharacterCreationLog.h"
-#include "CharacterCreationCommandlet.h"
+#include "CharacterCreationCommandlet/CharacterCreationLog.h"
+#include "CharacterCreationCommandlet/CharacterCreationCommandlet.h"
 
 class FCharacterCreationCppModule : public FDefaultGameModuleImpl
 {
