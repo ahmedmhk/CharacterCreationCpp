@@ -240,14 +240,7 @@ bool UCharacterCreationCommandlet::BatchProcessSpriteSheets(const FSpriteSheetIn
 	UE_LOG(LogCharacterCreation, Warning, TEXT("=== Starting Batch Processing ==="));
 	
 	// Get the RawAssets directory path
-	FString RawAssetsPath = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("RawAssets/"));
-	
-	// Validate the path is within project directory
-	if (!RawAssetsPath.StartsWith(FPaths::ProjectDir()))
-	{
-		UE_LOG(LogCharacterCreation, Error, TEXT("Invalid RawAssets path: %s"), *RawAssetsPath);
-		return false;
-	}
+	FString RawAssetsPath = FPaths::ProjectDir() / TEXT("RawAssets/");
 	
 	// Find all PNG files in the directory
 	TArray<FString> PNGFiles;
@@ -346,7 +339,14 @@ bool UCharacterCreationCommandlet::GenerateCharacterClass(const FString& Charact
 
 bool UCharacterCreationCommandlet::WriteCharacterHeaderFile(const FString& CharacterName, const FString& TextureName)
 {
-	FString FilePath = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/") / CharacterName + TEXT(".h");
+	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/");
+	if (!FPaths::DirectoryExists(SourceDir))
+	{
+		UE_LOG(LogCharacterCreation, Error, TEXT("Source directory does not exist: %s"), *SourceDir);
+		return false;
+	}
+	
+	FString FilePath = SourceDir / CharacterName + TEXT(".h");
 	
 	FString HeaderContent = FString::Printf(TEXT(
 		"// Generated character class for %s\n"
@@ -383,7 +383,14 @@ bool UCharacterCreationCommandlet::WriteCharacterHeaderFile(const FString& Chara
 
 bool UCharacterCreationCommandlet::WriteCharacterSourceFile(const FString& CharacterName, const FString& TextureName)
 {
-	FString FilePath = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/") / CharacterName + TEXT(".cpp");
+	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/");
+	if (!FPaths::DirectoryExists(SourceDir))
+	{
+		UE_LOG(LogCharacterCreation, Error, TEXT("Source directory does not exist: %s"), *SourceDir);
+		return false;
+	}
+	
+	FString FilePath = SourceDir / CharacterName + TEXT(".cpp");
 	
 	TStringBuilder<2048> SourceContent;
 	SourceContent.Appendf(TEXT("// Generated character class for %s\n"), *TextureName);
@@ -505,7 +512,7 @@ bool UCharacterCreationCommandlet::ValidateAndSanitizePath(FString& Path) const
 bool UCharacterCreationCommandlet::ValidateAssetReferences() const
 {
 	// Check if WarriorCharacter class exists
-	UClass* WarriorClass = FindObject<UClass>(ANY_PACKAGE, TEXT("AWarriorCharacter"));
+	UClass* WarriorClass = FindObject<UClass>(nullptr, TEXT("/Script/CharacterCreationCpp.WarriorCharacter"));
 	if (!WarriorClass)
 	{
 		// Try loading it
