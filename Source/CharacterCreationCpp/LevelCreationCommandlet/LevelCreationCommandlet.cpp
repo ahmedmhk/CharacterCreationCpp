@@ -20,6 +20,7 @@
 #include "Engine/StaticMeshActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "UObject/GarbageCollection.h"
 
 // Include headers for atmosphere actors
 #include "Atmosphere/AtmosphericFog.h"
@@ -88,6 +89,10 @@ int32 ULevelCreationCommandlet::Main(const FString& Params)
 	if (bSuccess)
 	{
 		PrintSuccess(MapName, OutputPath + MapName);
+		
+		// Clean up memory before exiting
+		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+		
 		UE_LOG(LogLevelCreation, Warning, TEXT("=== Level Creation Commandlet Completed Successfully ==="));
 		return 0;
 	}

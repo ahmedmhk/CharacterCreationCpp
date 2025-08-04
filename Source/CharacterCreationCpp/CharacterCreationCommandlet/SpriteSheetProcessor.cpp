@@ -163,16 +163,20 @@ UTexture2D* USpriteSheetProcessor::ImportTexture(const FString& RawAssetPath, co
 	NewTexture->NeverStream = true;
 
 	// Initialize texture with exact pixel data
-	NewTexture->SetPlatformData(new FTexturePlatformData());
-	NewTexture->GetPlatformData()->SizeX = Width;
-	NewTexture->GetPlatformData()->SizeY = Height;
-	NewTexture->GetPlatformData()->PixelFormat = PF_B8G8R8A8;
+	TUniquePtr<FTexturePlatformData> PlatformData = MakeUnique<FTexturePlatformData>();
+	PlatformData->SizeX = Width;
+	PlatformData->SizeY = Height;
+	PlatformData->PixelFormat = PF_B8G8R8A8;
 
 	// Create mip map with exact size
 	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	NewTexture->GetPlatformData()->Mips.Add(Mip);
+	PlatformData->Mips.Add(Mip);
+	NewTexture->SetPlatformData(PlatformData.Release());
 	Mip->SizeX = Width;
 	Mip->SizeY = Height;
+	
+	// Ensure thread safety for texture operations
+	check(IsInGameThread());
 	
 	// Copy pixel data
 	Mip->BulkData.Lock(LOCK_READ_WRITE);
@@ -212,8 +216,8 @@ bool USpriteSheetProcessor::ApplyPaper2DTextureSettings(UTexture2D* Texture)
 	Texture->PowerOfTwoMode = ETexturePowerOfTwoSetting::None; // Allow non-power-of-2
 	Texture->NeverStream = true; // Keep full resolution in memory
 	
-	UE_LOG(LogCharacterCreation, Warning, TEXT("Applied Paper2D texture settings to: %s"), *Texture->GetName());
-	UE_LOG(LogCharacterCreation, Warning, TEXT("Texture size after settings: %dx%d"), Texture->GetSizeX(), Texture->GetSizeY());
+	UE_LOG(LogCharacterCreation, Log, TEXT("Applied Paper2D texture settings to: %s"), *Texture->GetName());
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("Texture size after settings: %dx%d"), Texture->GetSizeX(), Texture->GetSizeY());
 	
 	Texture->PostEditChange();
 	Texture->MarkPackageDirty();
@@ -242,13 +246,16 @@ TArray<UPaperSprite*> USpriteSheetProcessor::ExtractSprites(UTexture2D* Texture,
 	int32 SpriteWidth = TextureWidth / SpriteInfo.Columns;
 	int32 SpriteHeight = TextureHeight / SpriteInfo.Rows;
 
-	UE_LOG(LogCharacterCreation, Warning, TEXT("DEBUG: Actual texture dimensions: %dx%d"), TextureWidth, TextureHeight);
-	UE_LOG(LogCharacterCreation, Warning, TEXT("DEBUG: Expected grid: %dx%d"), SpriteInfo.Columns, SpriteInfo.Rows);
-	UE_LOG(LogCharacterCreation, Warning, TEXT("DEBUG: Calculated sprite size: %dx%d"), SpriteWidth, SpriteHeight);
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("DEBUG: Actual texture dimensions: %dx%d"), TextureWidth, TextureHeight);
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("DEBUG: Expected grid: %dx%d"), SpriteInfo.Columns, SpriteInfo.Rows);
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("DEBUG: Calculated sprite size: %dx%d"), SpriteWidth, SpriteHeight);
 	
 	UE_LOG(LogCharacterCreation, Log, TEXT("Extracting sprites from %dx%d texture, sprite size: %dx%d"), 
 		TextureWidth, TextureHeight, SpriteWidth, SpriteHeight);
 
+	// Ensure we're on the game thread for texture access
+	check(IsInGameThread());
+	
 	// Access the source texture data
 	FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
 	uint8* SourceData = static_cast<uint8*>(Mip.BulkData.Lock(LOCK_READ_ONLY));
@@ -543,36 +550,32 @@ UTexture2D* USpriteSheetProcessor::CreateSpriteTexture(uint8* SourceData, int32 
 	}
 
 	// Initialize texture properties
-	NewTexture->SetPlatformData(new FTexturePlatformData());
-	NewTexture->GetPlatformData()->SizeX = SpriteWidth;
-	NewTexture->GetPlatformData()->SizeY = SpriteHeight;
-	NewTexture->GetPlatformData()->PixelFormat = PF_B8G8R8A8;
+	TUniquePtr<FTexturePlatformData> PlatformData = MakeUnique<FTexturePlatformData>();
+	PlatformData->SizeX = SpriteWidth;
+	PlatformData->SizeY = SpriteHeight;
+	PlatformData->PixelFormat = PF_B8G8R8A8;
 
 	// Create mip map
 	FTexture2DMipMap* Mip = new FTexture2DMipMap();
-	NewTexture->GetPlatformData()->Mips.Add(Mip);
+	PlatformData->Mips.Add(Mip);
+	NewTexture->SetPlatformData(PlatformData.Release());
 	Mip->SizeX = SpriteWidth;
 	Mip->SizeY = SpriteHeight;
+	
+	// Ensure thread safety for texture operations
+	check(IsInGameThread());
 	
 	// Calculate size and allocate destination data
 	int32 DataSize = SpriteWidth * SpriteHeight * BytesPerPixel;
 	Mip->BulkData.Lock(LOCK_READ_WRITE);
 	uint8* DestData = static_cast<uint8*>(Mip->BulkData.Realloc(DataSize));
 
-	// Copy pixel data from source texture region to destination
+	// Copy pixel data from source texture region to destination (optimized row-by-row copy)
 	for (int32 Y = 0; Y < SpriteHeight; Y++)
 	{
-		for (int32 X = 0; X < SpriteWidth; X++)
-		{
-			int32 SourceIndex = ((StartY + Y) * SourceWidth + (StartX + X)) * BytesPerPixel;
-			int32 DestIndex = (Y * SpriteWidth + X) * BytesPerPixel;
-			
-			// Copy all channels (RGBA)
-			for (int32 Channel = 0; Channel < BytesPerPixel; Channel++)
-			{
-				DestData[DestIndex + Channel] = SourceData[SourceIndex + Channel];
-			}
-		}
+		int32 SourceRowStart = ((StartY + Y) * SourceWidth + StartX) * BytesPerPixel;
+		int32 DestRowStart = Y * SpriteWidth * BytesPerPixel;
+		FMemory::Memcpy(&DestData[DestRowStart], &SourceData[SourceRowStart], SpriteWidth * BytesPerPixel);
 	}
 
 	Mip->BulkData.Unlock();

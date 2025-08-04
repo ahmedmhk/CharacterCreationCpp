@@ -14,5 +14,5 @@ public:
 	AWarriorPurpleCharacter();
 
 protected:
-	virtual void LoadAnimationsForCharacter() override;
+	virtual void LoadAnimations() override;
 };

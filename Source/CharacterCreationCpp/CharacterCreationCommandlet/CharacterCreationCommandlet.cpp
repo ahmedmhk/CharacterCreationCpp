@@ -6,6 +6,7 @@
 #include "Misc/Paths.h"
 #include "Misc/PackageName.h"
 #include "Engine/Engine.h"
+#include "UObject/GarbageCollection.h"
 
 UCharacterCreationCommandlet::UCharacterCreationCommandlet()
 {
@@ -79,6 +80,9 @@ int32 UCharacterCreationCommandlet::Main(const FString& Params)
 		
 		if (bSuccess)
 		{
+			// Clean up memory before exiting
+			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+			
 			UE_LOG(LogCharacterCreation, Warning, TEXT("=== Character Creation Commandlet Completed Successfully ==="));
 			return 0;
 		}
@@ -136,6 +140,9 @@ int32 UCharacterCreationCommandlet::Main(const FString& Params)
 					UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Generated character class: %s"), *CharacterName);
 				}
 			}
+			
+			// Clean up memory before exiting
+			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 			
 			UE_LOG(LogCharacterCreation, Warning, TEXT("=== Character Creation Commandlet Completed Successfully ==="));
 			return 0;

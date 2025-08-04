@@ -57,12 +57,8 @@ AWarriorCharacter::AWarriorCharacter()
     CameraComponent->SetProjectionMode(ECameraProjectionMode::Perspective);
     CameraComponent->SetFieldOfView(90.0f);
 
-    // Try to load animations in constructor for editor viewport display
-    // This will work if assets exist, otherwise BeginPlay() will handle it
-    TryLoadAnimationsForEditor();
-    
-    // Set default input assets as UPROPERTY values for Blueprint editor
-    TryLoadInputAssetsForEditor();
+    // NOTE: Asset loading moved to BeginPlay() to avoid LoadObject in constructor
+    // This is safer and follows Unreal best practices
 }
 
 void AWarriorCharacter::BeginPlay()
@@ -80,51 +76,46 @@ void AWarriorCharacter::BeginPlay()
             if (DefaultMappingContext)
             {
                 Subsystem->AddMappingContext(DefaultMappingContext, 0);
-                UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Added Input Mapping Context: IMC_PlayerInput"));
+                UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Added Input Mapping Context: IMC_PlayerInput"));
             }
             else
             {
-                UE_LOG(LogCharacterCreation, Warning, TEXT("✗ DefaultMappingContext is null - not loaded in constructor"));
+                UE_LOG(LogCharacterCreation, Verbose, TEXT("✗ DefaultMappingContext is null - not loaded in constructor"));
             }
         }
     }
 
     // Input actions should already be loaded in constructor, log their status
-    UE_LOG(LogCharacterCreation, Warning, TEXT("BeginPlay - Input Actions Status:"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("BeginPlay - Input Actions Status:"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
     
-    // Load animations in BeginPlay if not already loaded in constructor
-    if (!IdleAnimation)
+    // Load animations in BeginPlay (safer than constructor loading)
+    LoadAnimations();
+    
+    // Load input assets if not already set via Blueprint
+    if (!DefaultMappingContext || !MoveAction || !AttackAction)
     {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Animations not loaded in constructor, loading in BeginPlay"));
-        LoadAnimationsForCharacter();
-    }
-    else
-    {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Animations already loaded in constructor (%d/8)"), 
-            (IdleAnimation ? 1 : 0) + (MoveAnimation ? 1 : 0) + (AttackUpAnimation ? 1 : 0) + 
-            (AttackDownAnimation ? 1 : 0) + (AttackSideAnimation ? 1 : 0) + (AttackUp2Animation ? 1 : 0) + 
-            (AttackDown2Animation ? 1 : 0) + (AttackSide2Animation ? 1 : 0));
+        LoadInputAssets();
     }
     
     // Set initial animation on the sprite component
     if (SpriteComponent && IdleAnimation)
     {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Setting initial IdleAnimation on sprite component"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("Setting initial IdleAnimation on sprite component"));
         SpriteComponent->SetFlipbook(IdleAnimation);
     }
     else
     {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Cannot set initial animation - SpriteComponent: %s, IdleAnimation: %s"), 
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("Cannot set initial animation - SpriteComponent: %s, IdleAnimation: %s"), 
             SpriteComponent ? TEXT("Valid") : TEXT("NULL"),
             IdleAnimation ? TEXT("Valid") : TEXT("NULL"));
     }
 }
 
-void AWarriorCharacter::LoadAnimationsForCharacter()
+void AWarriorCharacter::LoadAnimations()
 {
-    UE_LOG(LogCharacterCreation, Warning, TEXT("=== LoadAnimationsForCharacter() called - Loading and assigning all 8 animations ==="));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("=== LoadAnimations() called - Loading and assigning all 8 animations ==="));
     
     // Load and assign primary animation assets directly to UPROPERTY variables
     IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle"));
@@ -139,14 +130,14 @@ void AWarriorCharacter::LoadAnimationsForCharacter()
     AttackSide2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways2"));
 
     // Log assignment status
-    UE_LOG(LogCharacterCreation, Warning, TEXT("IdleAnimation assigned: %s"), IdleAnimation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("MoveAnimation assigned: %s"), MoveAnimation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackUpAnimation assigned: %s"), AttackUpAnimation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackDownAnimation assigned: %s"), AttackDownAnimation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackSideAnimation assigned: %s"), AttackSideAnimation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackUp2Animation assigned: %s"), AttackUp2Animation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackDown2Animation assigned: %s"), AttackDown2Animation ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("AttackSide2Animation assigned: %s"), AttackSide2Animation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("IdleAnimation assigned: %s"), IdleAnimation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("MoveAnimation assigned: %s"), MoveAnimation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackUpAnimation assigned: %s"), AttackUpAnimation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackDownAnimation assigned: %s"), AttackDownAnimation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackSideAnimation assigned: %s"), AttackSideAnimation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackUp2Animation assigned: %s"), AttackUp2Animation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackDown2Animation assigned: %s"), AttackDown2Animation ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("AttackSide2Animation assigned: %s"), AttackSide2Animation ? TEXT("YES") : TEXT("NO"));
     
     // Count successful assignments
     int32 AssignedCount = 0;
@@ -159,7 +150,7 @@ void AWarriorCharacter::LoadAnimationsForCharacter()
     if (AttackDown2Animation) AssignedCount++;
     if (AttackSide2Animation) AssignedCount++;
     
-    UE_LOG(LogCharacterCreation, Warning, TEXT("=== Animation Assignment Complete: %d/8 animations assigned ==="), AssignedCount);
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("=== Animation Assignment Complete: %d/8 animations assigned ==="), AssignedCount);
     
     if (GEngine)
     {
@@ -176,17 +167,7 @@ void AWarriorCharacter::LoadAnimationsForCharacter()
     }
 }
 
-void AWarriorCharacter::LoadAndAssignAnimations()
-{
-    // Legacy function - now just calls LoadAnimationsForCharacter for backward compatibility
-    LoadAnimationsForCharacter();
-}
-
-void AWarriorCharacter::LoadAnimations()
-{
-    // Legacy function - now just calls LoadAndAssignAnimations for backward compatibility
-    LoadAndAssignAnimations();
-}
+// Removed legacy LoadAndAssignAnimations function - no longer needed
 
 void AWarriorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -199,22 +180,22 @@ void AWarriorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     if (MoveAction)
     {
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AWarriorCharacter::Move);
-        UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Bound Move Action"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Bound Move Action"));
     }
     else
     {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("✗ MoveAction is null, cannot bind"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("✗ MoveAction is null, cannot bind"));
     }
 
     // Bind Attack Action (Left Mouse)
     if (AttackAction)
     {
         EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWarriorCharacter::Attack);
-        UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Bound Attack Action"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Bound Attack Action"));
     }
     else
     {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("✗ AttackAction is null, cannot bind"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("✗ AttackAction is null, cannot bind"));
     }
 }
 
@@ -261,7 +242,7 @@ void AWarriorCharacter::Attack(const FInputActionValue& Value)
         // Set timer to end attack
         GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AWarriorCharacter::EndAttack, 0.5f, false);
         
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Attack performed!"));
+        UE_LOG(LogCharacterCreation, Verbose, TEXT("Attack performed!"));
         
         if (GEngine)
         {
@@ -345,62 +326,29 @@ void AWarriorCharacter::EndAttack()
     }
 }
 
-void AWarriorCharacter::TryLoadAnimationsForEditor()
-{
-    // Safely try to load animations for editor viewport display
-    // This will silently fail if assets don't exist yet
-    
-    UE_LOG(LogCharacterCreation, Warning, TEXT("=== TryLoadAnimationsForEditor() called in constructor ==="));
-    
-    // Try to load primary animations with null safety
-    IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle"));
-    MoveAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Move"));
-    AttackUpAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards"));
-    AttackDownAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards"));
-    AttackSideAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways"));
-    AttackUp2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards2"));
-    AttackDown2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards2"));
-    AttackSide2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways2"));
-    
-    // Count successful loads
-    int32 LoadedCount = 0;
-    if (IdleAnimation) LoadedCount++;
-    if (MoveAnimation) LoadedCount++;
-    if (AttackUpAnimation) LoadedCount++;
-    if (AttackDownAnimation) LoadedCount++;
-    if (AttackSideAnimation) LoadedCount++;
-    if (AttackUp2Animation) LoadedCount++;
-    if (AttackDown2Animation) LoadedCount++;
-    if (AttackSide2Animation) LoadedCount++;
-    
-    UE_LOG(LogCharacterCreation, Warning, TEXT("Constructor loaded %d/8 animations"), LoadedCount);
-    
-    // If we successfully loaded IdleAnimation, set it on the sprite component for editor display
-    if (SpriteComponent && IdleAnimation)
-    {
-        SpriteComponent->SetFlipbook(IdleAnimation);
-        UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Set IdleAnimation on sprite component in constructor"));
-    }
-    else
-    {
-        UE_LOG(LogCharacterCreation, Warning, TEXT("Cannot set sprite in constructor - SpriteComponent: %s, IdleAnimation: %s"), 
-            SpriteComponent ? TEXT("Valid") : TEXT("NULL"),
-            IdleAnimation ? TEXT("Valid") : TEXT("NULL"));
-    }
-}
+// TryLoadAnimationsForEditor() removed - LoadObject should not be called in constructors
 
-void AWarriorCharacter::TryLoadInputAssetsForEditor()
+void AWarriorCharacter::LoadInputAssets()
 {
-    UE_LOG(LogCharacterCreation, Warning, TEXT("=== TryLoadInputAssetsForEditor() called in constructor ==="));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("=== LoadInputAssets() called in BeginPlay ==="));
     
-    // Try to load input assets for editor display (will silently fail if assets don't exist yet)
-    DefaultMappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
-    MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
-    AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
+    // Load input assets safely in BeginPlay (not in constructor)
+    if (!DefaultMappingContext)
+    {
+        DefaultMappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
+    }
+    if (!MoveAction)
+    {
+        MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
+    }
+    if (!AttackAction)
+    {
+        AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
+    }
     
     // Log what was loaded
-    UE_LOG(LogCharacterCreation, Warning, TEXT("Constructor loaded input assets:"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("- DefaultMappingContext: %s"), DefaultMappingContext ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("- MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
-    UE_LOG(LogCharacterCreation, Warning, TEXT("- AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("Loaded input assets:"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("- DefaultMappingContext: %s"), DefaultMappingContext ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("- MoveAction: %s"), MoveAction ? TEXT("YES") : TEXT("NO"));
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("- AttackAction: %s"), AttackAction ? TEXT("YES") : TEXT("NO"));
 }

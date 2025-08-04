@@ -7,13 +7,12 @@
 AWarriorRedCharacter::AWarriorRedCharacter()
 {
 	// Character is already set up by parent class
-	// Load animations in constructor for editor preview
-	LoadAnimationsForCharacter();
+	// Asset loading moved to BeginPlay() to follow Unreal best practices
 }
 
-void AWarriorRedCharacter::LoadAnimationsForCharacter()
+void AWarriorRedCharacter::LoadAnimations()
 {
-	UE_LOG(LogCharacterCreation, Warning, TEXT("Loading animations for WarriorRedCharacter"));
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("Loading animations for WarriorRedCharacter"));
 	
 	// Load animations specific to Warrior_Red
 	IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle_Warrior_Red"));

@@ -84,9 +84,9 @@ private:
 	UTexture2D* CreateSpriteTexture(uint8* SourceData, int32 SourceWidth, int32 SourceHeight, 
 		int32 StartX, int32 StartY, int32 SpriteWidth, int32 SpriteHeight, int32 BytesPerPixel, const FString& SpriteName);
 	
-	UPROPERTY()
+	UPROPERTY(Transient, VisibleAnywhere, Category = "Generated Assets")
 	TArray<UPaperSprite*> GeneratedSprites;
 
-	UPROPERTY()
+	UPROPERTY(Transient, VisibleAnywhere, Category = "Generated Assets")
 	TArray<UPaperFlipbook*> GeneratedFlipbooks;
 };

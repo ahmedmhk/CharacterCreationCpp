@@ -7,13 +7,12 @@
 AWarriorBlueCharacter::AWarriorBlueCharacter()
 {
 	// Character is already set up by parent class
-	// Load animations in constructor for editor preview
-	LoadAnimationsForCharacter();
+	// Asset loading moved to BeginPlay() to follow Unreal best practices
 }
 
-void AWarriorBlueCharacter::LoadAnimationsForCharacter()
+void AWarriorBlueCharacter::LoadAnimations()
 {
-	UE_LOG(LogCharacterCreation, Warning, TEXT("Loading animations for WarriorBlueCharacter"));
+	UE_LOG(LogCharacterCreation, Verbose, TEXT("Loading animations for WarriorBlueCharacter"));
 	
 	// Load animations specific to Warrior_Blue
 	IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle_Warrior_Blue"));
@@ -29,7 +28,7 @@ void AWarriorBlueCharacter::LoadAnimationsForCharacter()
 	if (GetSprite() && IdleAnimation)
 	{
 		GetSprite()->SetFlipbook(IdleAnimation);
-		UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Set initial animation for WarriorBlueCharacter"));
+		UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Set initial animation for WarriorBlueCharacter"));
 	}
 	else
 	{
