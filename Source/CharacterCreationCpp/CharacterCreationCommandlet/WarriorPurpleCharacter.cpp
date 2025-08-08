@@ -12,7 +12,7 @@ AWarriorPurpleCharacter::AWarriorPurpleCharacter()
 
 void AWarriorPurpleCharacter::LoadAnimations()
 {
-	UE_LOG(LogCharacterCreation, Verbose, TEXT("Loading animations for WarriorPurpleCharacter"));
+	UE_LOG(LogCharacterCreation, Warning, TEXT("=== WarriorPurpleCharacter::LoadAnimations() CALLED - CORRECT! ==="));
 	
 	// Load animations specific to Warrior_Purple
 	IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle_Warrior_Purple"));
@@ -24,15 +24,19 @@ void AWarriorPurpleCharacter::LoadAnimations()
 	AttackDown2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards2_Warrior_Purple"));
 	AttackSide2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways2_Warrior_Purple"));
 	
+	UE_LOG(LogCharacterCreation, Warning, TEXT("Loaded animations: Idle=%s, Move=%s"), 
+		IdleAnimation ? TEXT("YES") : TEXT("NO"),
+		MoveAnimation ? TEXT("YES") : TEXT("NO"));
+	
 	// Set initial animation
 	if (GetSprite() && IdleAnimation)
 	{
 		GetSprite()->SetFlipbook(IdleAnimation);
-		UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Set initial animation for WarriorPurpleCharacter"));
+		UE_LOG(LogCharacterCreation, Warning, TEXT("✓✓✓ SUCCESSFULLY set IdleAnimation flipbook for WarriorPurpleCharacter ✓✓✓"));
 	}
 	else
 	{
-		UE_LOG(LogCharacterCreation, Warning, TEXT("Failed to set animation - Sprite: %s, IdleAnimation: %s"),
+		UE_LOG(LogCharacterCreation, Error, TEXT("FAILED to set animation - Sprite: %s, IdleAnimation: %s"),
 			GetSprite() ? TEXT("Valid") : TEXT("NULL"),
 			IdleAnimation ? TEXT("Valid") : TEXT("NULL"));
 	}

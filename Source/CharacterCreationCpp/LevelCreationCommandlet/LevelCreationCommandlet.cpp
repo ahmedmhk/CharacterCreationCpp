@@ -21,6 +21,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/GarbageCollection.h"
+#include "../CharacterCreationCommandlet/WarriorPurpleCharacter.h"
+#include "GameFramework/PlayerStart.h"
+#include "PaperFlipbook.h"
+#include "PaperFlipbookComponent.h"
 
 // Include headers for atmosphere actors
 #include "Atmosphere/AtmosphericFog.h"
@@ -209,6 +213,20 @@ bool ULevelCreationCommandlet::SpawnEnvironmentalActors(UWorld* World)
 		return false;
 	}
 	UE_LOG(LogLevelCreation, Warning, TEXT("✓ Plane Actor spawned"));
+
+	// 7. Spawn Warrior Purple Character on top of the plane
+	// Calculate spawn location: plane is at (0,0,0) with scale 8x8x8
+	// The plane mesh is 100x100 units by default, so scaled it's 800x800 units
+	// Spawn character slightly above the plane surface
+	FVector CharacterSpawnLocation(0.0f, 0.0f, 50.0f); // 50 units above plane center
+	
+	AWarriorPurpleCharacter* WarriorCharacter = SpawnWarriorPurpleCharacter(World, CharacterSpawnLocation);
+	if (!WarriorCharacter)
+	{
+		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn Warrior Purple Character"));
+		return false;
+	}
+	UE_LOG(LogLevelCreation, Warning, TEXT("✓ Warrior Purple Character spawned at location: %s"), *CharacterSpawnLocation.ToString());
 
 	return true;
 }
@@ -504,6 +522,8 @@ void ULevelCreationCommandlet::PrintSuccess(const FString& MapName, const FStrin
 	UE_LOG(LogLevelCreation, Warning, TEXT("☁️  Volumetric Cloud"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("🌫️  Exponential Height Fog"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("🏗️  Plane Static Mesh (Ground) - Scale: 8x8x8"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("🎮 Warrior Purple Character"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("🚩 Player Start"));
 	UE_LOG(LogLevelCreation, Warning, TEXT(""));
 	UE_LOG(LogLevelCreation, Warning, TEXT("📋 Open the level in the Unreal Editor to see your new environment!"));
 }
@@ -541,6 +561,8 @@ void ULevelCreationCommandlet::PrintDryRunSummary(const FString& MapName, const 
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Volumetric Cloud"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Exponential Height Fog"));
 	UE_LOG(LogLevelCreation, Warning, TEXT("  • Plane Static Mesh (Ground) - Scale: 8x8x8"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("  • Warrior Purple Character"));
+	UE_LOG(LogLevelCreation, Warning, TEXT("  • Player Start"));
 	UE_LOG(LogLevelCreation, Warning, TEXT(""));
 	UE_LOG(LogLevelCreation, Warning, TEXT("No files have been created or modified."));
 	UE_LOG(LogLevelCreation, Warning, TEXT("Remove -dryrun flag to execute these operations."));
@@ -577,4 +599,84 @@ bool ULevelCreationCommandlet::ValidateAndSanitizePath(FString& Path) const
 	}
 	
 	return true;
+}
+
+AWarriorPurpleCharacter* ULevelCreationCommandlet::SpawnWarriorPurpleCharacter(UWorld* World, const FVector& Location)
+{
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	UE_LOG(LogLevelCreation, Warning, TEXT("Spawning Warrior Purple Character..."));
+
+	// First, spawn a PlayerStart at the location for proper player spawning
+	FActorSpawnParameters PlayerStartParams;
+	PlayerStartParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
+		APlayerStart::StaticClass(),
+		Location,
+		FRotator::ZeroRotator,
+		PlayerStartParams
+	);
+
+	if (PlayerStart)
+	{
+		PlayerStart->SetActorLabel(TEXT("PlayerStart_WarriorPurple"));
+		UE_LOG(LogLevelCreation, Warning, TEXT("✓ PlayerStart spawned for character"));
+	}
+
+	// Now spawn the Warrior Purple Character
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	// Use the C++ class directly
+	UClass* WarriorPurpleClass = AWarriorPurpleCharacter::StaticClass();
+	UE_LOG(LogLevelCreation, Warning, TEXT("Using C++ class AWarriorPurpleCharacter"));
+
+	AWarriorPurpleCharacter* WarriorCharacter = World->SpawnActor<AWarriorPurpleCharacter>(
+		WarriorPurpleClass,
+		Location,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	if (WarriorCharacter)
+	{
+		// Set some initial properties
+		WarriorCharacter->SetActorLabel(TEXT("WarriorPurpleCharacter"));
+		
+		// Make sure the character is set to possess
+		WarriorCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
+		
+		// Set up a default visible sprite
+		UPaperFlipbookComponent* SpriteComponent = WarriorCharacter->GetSprite();
+		if (SpriteComponent)
+		{
+			// Load the idle animation flipbook as default
+			UPaperFlipbook* IdleFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle_Warrior_Purple"));
+			if (IdleFlipbook)
+			{
+				SpriteComponent->SetFlipbook(IdleFlipbook);
+				SpriteComponent->SetVisibility(true);
+				SpriteComponent->SetHiddenInGame(false);
+				UE_LOG(LogLevelCreation, Warning, TEXT("✓ Set default Idle animation on character sprite"));
+			}
+			else
+			{
+				UE_LOG(LogLevelCreation, Warning, TEXT("✗ Could not load Idle_Warrior_Purple animation"));
+			}
+		}
+		
+		UE_LOG(LogLevelCreation, Warning, TEXT("✓ Warrior Purple Character spawned successfully"));
+		UE_LOG(LogLevelCreation, Warning, TEXT("  - Location: %s"), *WarriorCharacter->GetActorLocation().ToString());
+		UE_LOG(LogLevelCreation, Warning, TEXT("  - Class: %s"), *WarriorCharacter->GetClass()->GetName());
+	}
+	else
+	{
+		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn Warrior Purple Character"));
+	}
+
+	return WarriorCharacter;
 }

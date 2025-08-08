@@ -23,6 +23,7 @@ class CHARACTERCREATIONCPP_API AWarriorCharacter : public APaperCharacter
 
 public:
     AWarriorCharacter();
+    virtual void PostInitializeComponents() override;
 
 protected:
     virtual void BeginPlay() override;
@@ -151,9 +152,7 @@ protected:
     void SetAnimation(UPaperFlipbook* NewAnimation);
     void UpdateSpriteDirection();
     void EndAttack();
-    void LoadAnimations();
     void LoadAndAssignAnimations();
-    void TryLoadAnimationsForEditor();
     void TryLoadInputAssetsForEditor();
 
 private:
