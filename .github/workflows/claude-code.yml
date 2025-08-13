@@ -13,6 +13,7 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
+  actions: read
 
 jobs:
   claude-code:
@@ -24,16 +25,17 @@ jobs:
       - name: Run Claude Code
         uses: anthropics/claude-code-action@beta
         with:
+          # Use the built-in GitHub token
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          
           # Optional: Add your Anthropic API key as a secret
+          # You need to add this in your repository Settings > Secrets
           # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           
-          # Optional: Use a custom GitHub token if needed
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Specify Claude model
+          model: claude-3-5-sonnet-latest
           
-          # Optional: Specify Claude model
-          # model: claude-3-5-sonnet-latest
-          
-          # Optional: Custom instructions for Claude
+          # Custom instructions for Claude
           instructions: |
             Review the Unreal Engine C++ code for best practices.
             Focus on:
