@@ -1,0 +1,43 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Claude Code
+        uses: anthropics/claude-code-action@beta
+        with:
+          # Optional: Add your Anthropic API key as a secret
+          # anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+          # Optional: Use a custom GitHub token if needed
+          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Optional: Specify Claude model
+          # model: claude-3-5-sonnet-latest
+          
+          # Optional: Custom instructions for Claude
+          instructions: |
+            Review the Unreal Engine C++ code for best practices.
+            Focus on:
+            - Memory management and potential leaks
+            - Unreal Engine coding standards
+            - Performance optimizations
+            - Blueprint integration issues
