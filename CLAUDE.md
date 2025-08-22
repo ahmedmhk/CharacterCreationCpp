@@ -4,38 +4,48 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an Unreal Engine 5.6 C++ project called "CharacterCreationCpp" designed for character creation functionality. It's a basic Unreal project with minimal custom code currently implemented.
+This is an Unreal Engine 5.5 C++ project called "CharacterCreationCpp" designed for character creation functionality. It's a basic Unreal project with minimal custom code currently implemented.
+
+## Environment Paths (Windows)
+
+- **Unreal Engine Installation**: `C:\Epic Games\UE_5.5\`
+- **UnrealEditor Executable**: `C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor.exe`
+- **UnrealEditor-Cmd Executable**: `C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe`
+- **Build Batch File**: `C:\Epic Games\UE_5.5\Engine\Build\BatchFiles\Build.bat`
+- **Project Path**: `C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject`
 
 ## Build System and Commands
 
-### Building the Project
-- **Main Editor Build**: `make CharacterCreationCppEditor` or `make CharacterCreationCppEditor-Linux-Development`
-- **Game Build**: `make CharacterCreationCpp` or `make CharacterCreationCpp-Linux-Development`
-- **Complete Standard Build**: `make StandardSet` (builds required tools + editor + insights)
-- **Generate Project Files**: `make configure`
+### Building the Project (Windows)
+- **Build Editor**: `"C:\Epic Games\UE_5.5\Engine\Build\BatchFiles\Build.bat" CharacterCreationCppEditor Win64 Development "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -waitmutex`
+- **Rebuild Editor**: Add `-clean` before `-waitmutex` to clean and rebuild
 
-### Development Builds
-- **Debug Editor**: `make CharacterCreationCppEditor-Linux-DebugGame`
-- **Development Editor**: `make CharacterCreationCppEditor-Linux-Development`
-- **Debug Game**: `make CharacterCreationCpp-Linux-DebugGame`
-- **Shipping Game**: `make CharacterCreationCpp-Linux-Shipping`
+### Running Commandlets (Windows)
+**IMPORTANT**: Always use these exact commands with all parameters:
 
-### Platform-Specific Builds
-- **Android**: Use targets like `CharacterCreationCpp-Android-Development`
-- **Linux ARM64**: Use targets like `CharacterCreationCpp-LinuxArm64-Development`
+```powershell
+# Run CharacterCreationCommandlet (processes sprite sheets)
+& "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=CharacterCreationCommandlet -batch -nullrhi -nosplash -nopause
 
-### Launching the Project
-```bash
-"/home/ahmedmhk/UnrealEngine/Linux_Unreal_Engine_5.6.0/Engine/Binaries/Linux/UnrealEditor" "/home/ahmedmhk/Documents/Unreal Projects/CharacterCreationCpp/CharacterCreationCpp.uproject" -nullrhi
+# Run LevelCreationCommandlet (creates Map1)
+& "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=LevelCreationCommandlet -nullrhi -nosplash -nopause
+
+# Run GameModeCreationCommandlet (creates MyGameMode)
+& "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=GameModeCreationCommandlet -nullrhi -nosplash -nopause
+```
+
+### Launching the Editor
+```powershell
+& "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject"
 ```
 
 ## Project Structure
 
 ### Core Module Configuration
 - **Primary Module**: `CharacterCreationCpp` (Runtime module)
-- **Dependencies**: Core, CoreUObject, Engine, InputCore, EnhancedInput
-- **Build System**: Uses Unreal Build Tool (UBT) with C++20 and Unreal 5.6 include order
-- **Active Plugin**: ModelingToolsEditorMode (Editor-only)
+- **Dependencies**: Core, CoreUObject, Engine, InputCore, EnhancedInput, Paper2D, GameplayTags
+- **Build System**: Uses Unreal Build Tool (UBT) with C++20 and Unreal 5.5 include order
+- **Active Plugins**: ModelingToolsEditorMode (Editor-only), Paper2D, GameplayAbilities, RawInput
 
 ### Source Code Layout
 ```
@@ -44,8 +54,13 @@ Source/
 ├── CharacterCreationCppEditor.Target.cs    # Editor target configuration
 └── CharacterCreationCpp/
     ├── CharacterCreationCpp.Build.cs       # Module build configuration
-    ├── CharacterCreationCpp.h              # Main module header (minimal)
-    └── CharacterCreationCpp.cpp             # Main module implementation
+    ├── CharacterCreationCpp.h              # Main module header
+    ├── CharacterCreationCpp.cpp             # Main module implementation
+    ├── CharacterCreationCommandlet/        # Sprite processing commandlet
+    ├── LevelCreationCommandlet/            # Level creation commandlet
+    ├── GameModeCreationCommandlet/         # Game mode creation commandlet
+    ├── MyGameMode.cpp/h                    # Custom game mode
+    └── Warrior*Character.cpp/h             # Generated character classes
 ```
 
 ### Key Directories

@@ -4,6 +4,10 @@
 #include "Modules/ModuleManager.h"
 #include "CharacterCreationCommandlet/CharacterCreationLog.h"
 #include "CharacterCreationCommandlet/CharacterCreationCommandlet.h"
+#include "LevelCreationCommandlet/LevelCreationCommandlet.h"
+#include "GameModeCreationCommandlet/GameModeCreationCommandlet.h"
+#include "CameraPawnCreationCommandlet/CameraPawnCreationCommandlet.h"
+#include "CameraPawnCreationCommandlet/CameraPawnCreationLog.h"
 
 class FCharacterCreationCppModule : public FDefaultGameModuleImpl
 {
