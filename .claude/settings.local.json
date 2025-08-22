@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\UnrealEngine\\Engine\\Build\\BatchFiles\\Build.bat\" CharacterCreationCppEditor Win64 Development \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -waitmutex)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=CharacterCreationCommandlet -nullrhi -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=CharacterCreationCommandlet -batch -createcharacter -nullrhi -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -nullrhi -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=GameModeCreationCommandlet -nullrhi -unattended)",
+      "Bash(powershell:*)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -nullrhi -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -nullrhi -nosplash -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -unattended)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -mapname=Map1 -outputpath=/Game/Maps/ -unattended -nosplash -nopause -nullrhi)",
+      "Bash(\"C:\\UnrealEngine\\Engine\\Binaries\\Win64\\UnrealEditor-Cmd.exe\" \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -run=LevelCreationCommandlet -nullrhi -unattended -log)",
+      "Bash(\"C:\\Epic Games\\UE_5.5\\Engine\\Build\\BatchFiles\\Build.bat\" CharacterCreationCppEditor Win64 Development \"C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp\\CharacterCreationCpp.uproject\" -waitmutex)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

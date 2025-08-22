@@ -146,6 +146,7 @@ public:
 protected:
     // Enhanced Input functions
     void Move(const FInputActionValue& Value);
+    void StopMove(const FInputActionValue& Value);
     void Attack(const FInputActionValue& Value);
 
     // Animation functions

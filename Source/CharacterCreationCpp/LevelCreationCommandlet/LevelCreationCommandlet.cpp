@@ -21,7 +21,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/GarbageCollection.h"
-#include "../CharacterCreationCommandlet/WarriorPurpleCharacter.h"
+#include "../WarriorPurpleCharacter.h"
 #include "GameFramework/PlayerStart.h"
 #include "PaperFlipbook.h"
 #include "PaperFlipbookComponent.h"

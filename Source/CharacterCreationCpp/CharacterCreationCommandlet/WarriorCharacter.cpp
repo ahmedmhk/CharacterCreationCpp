@@ -26,14 +26,14 @@ AWarriorCharacter::AWarriorCharacter()
     GetCharacterMovement()->AirControl = 0.2f;
     GetCharacterMovement()->GroundFriction = 8.0f;
     
-    // Constrain to 2D plane
+    // Constrain to 2D plane (X-Y plane for proper movement)
     GetCharacterMovement()->bConstrainToPlane = true;
-    GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0, 1, 0));
+    GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0, 0, 1)); // Constrain to X-Y plane
 
     // Configure capsule collision to fit sprite better
-    // Typical sprite character is about 32x32 pixels, adjust capsule accordingly
-    GetCapsuleComponent()->SetCapsuleHalfHeight(32.0f);
-    GetCapsuleComponent()->SetCapsuleRadius(16.0f);
+    // Adjusted dimensions for better sprite fit
+    GetCapsuleComponent()->SetCapsuleHalfHeight(20.0f);
+    GetCapsuleComponent()->SetCapsuleRadius(15.0f);
 
     // Get sprite component reference
     SpriteComponent = GetSprite();
@@ -44,8 +44,8 @@ AWarriorCharacter::AWarriorCharacter()
     {
         SpriteComponent->SetRelativeRotation(FRotator(0, 0, 0)); // Align vertically with capsule
         // Offset sprite down so feet align with capsule bottom
-        // Capsule half-height is 32, so offset sprite down by ~28 units to align feet
-        SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -28.0f));
+        // Capsule half-height is 20, so offset sprite down by ~16 units to align feet
+        SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -16.0f));
         
         // Try loading animations right here in constructor for the specific derived class
         // This is a workaround for virtual functions not working in constructors
@@ -224,6 +224,7 @@ void AWarriorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     if (MoveAction)
     {
         EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AWarriorCharacter::Move);
+        EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &AWarriorCharacter::StopMove);
         UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Bound Move Action"));
     }
     else
@@ -234,7 +235,7 @@ void AWarriorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
     // Bind Attack Action (Left Mouse)
     if (AttackAction)
     {
-        EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AWarriorCharacter::Attack);
+        EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AWarriorCharacter::Attack);
         UE_LOG(LogCharacterCreation, Verbose, TEXT("✓ Bound Attack Action"));
     }
     else
@@ -271,9 +272,19 @@ void AWarriorCharacter::Move(const FInputActionValue& Value)
     
     if (FMath::Abs(MovementVector.Y) > 0.1f)
     {
-        // Add vertical movement input for platforming
-        AddMovementInput(FVector(0, 0, 1), MovementVector.Y);
+        // Add vertical movement input (Y-axis for top-down movement)
+        // Negate the Y value to fix inverted controls (W should go up/forward, S should go down/back)
+        AddMovementInput(FVector(0, 1, 0), -MovementVector.Y);
     }
+}
+
+void AWarriorCharacter::StopMove(const FInputActionValue& Value)
+{
+    // Reset movement values when input is released
+    CurrentMoveRightValue = 0.0f;
+    CurrentMoveUpValue = 0.0f;
+    
+    UE_LOG(LogCharacterCreation, Verbose, TEXT("StopMove called - movement values reset to 0"));
 }
 
 void AWarriorCharacter::Attack(const FInputActionValue& Value)

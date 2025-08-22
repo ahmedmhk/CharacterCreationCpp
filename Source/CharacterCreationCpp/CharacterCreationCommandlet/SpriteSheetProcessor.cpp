@@ -21,6 +21,7 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
+#include "InputModifiers.h"
 
 USpriteSheetProcessor::USpriteSheetProcessor()
 {
@@ -63,23 +64,48 @@ bool USpriteSheetProcessor::ProcessSpriteSheet(const FString& TextureName, const
 	GeneratedSprites = ExtractedSprites;
 	GeneratedFlipbooks = CreatedAnimations;
 
-	// Create Input Actions
-	UE_LOG(LogCharacterCreation, Warning, TEXT("Creating Input Actions..."));
-	UInputAction* MoveAction = CreateInputAction(TEXT("IA_Move"), TEXT("/Game/Input/IA_Move"));
-	UInputAction* AttackAction = CreateInputAction(TEXT("IA_Attack"), TEXT("/Game/Input/IA_Attack"));
-
-	// Create Input Mapping Context
-	UInputMappingContext* MappingContext = nullptr;
-	if (MoveAction && AttackAction)
+	// Check if input assets already exist
+	UInputAction* MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
+	UInputAction* AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
+	UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
+	
+	bool bInputAssetsCreated = false;
+	
+	// Only create input assets if they don't exist
+	if (!MoveAction || !AttackAction || !MappingContext)
 	{
-		UE_LOG(LogCharacterCreation, Warning, TEXT("Creating Input Mapping Context..."));
-		MappingContext = CreateInputMappingContext(TEXT("IMC_PlayerInput"), TEXT("/Game/Input/IMC_PlayerInput"), MoveAction, AttackAction);
+		UE_LOG(LogCharacterCreation, Warning, TEXT("Input assets not found, creating new ones..."));
+		
+		// Create Input Actions if they don't exist
+		if (!MoveAction)
+		{
+			UE_LOG(LogCharacterCreation, Warning, TEXT("Creating Input Action: IA_Move..."));
+			MoveAction = CreateInputAction(TEXT("IA_Move"), TEXT("/Game/Input/IA_Move"));
+		}
+		
+		if (!AttackAction)
+		{
+			UE_LOG(LogCharacterCreation, Warning, TEXT("Creating Input Action: IA_Attack..."));
+			AttackAction = CreateInputAction(TEXT("IA_Attack"), TEXT("/Game/Input/IA_Attack"));
+		}
+		
+		// Create Input Mapping Context if it doesn't exist
+		if (!MappingContext && MoveAction && AttackAction)
+		{
+			UE_LOG(LogCharacterCreation, Warning, TEXT("Creating Input Mapping Context: IMC_PlayerInput..."));
+			MappingContext = CreateInputMappingContext(TEXT("IMC_PlayerInput"), TEXT("/Game/Input/IMC_PlayerInput"), MoveAction, AttackAction);
+			bInputAssetsCreated = true;
+		}
+	}
+	else
+	{
+		UE_LOG(LogCharacterCreation, Warning, TEXT("Input assets already exist, skipping creation"));
 	}
 
 	UE_LOG(LogCharacterCreation, Log, TEXT("Successfully processed sprite sheet: %s"), *TextureName);
 	UE_LOG(LogCharacterCreation, Log, TEXT("Generated %d sprites and %d animations"), ExtractedSprites.Num(), CreatedAnimations.Num());
 	
-	if (MoveAction && AttackAction && MappingContext)
+	if (bInputAssetsCreated)
 	{
 		UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Input system created: IA_Move, IA_Attack, and IMC_PlayerInput"));
 	}
@@ -711,20 +737,20 @@ UInputMappingContext* USpriteSheetProcessor::CreateInputMappingContext(const FSt
 	const TArray<FEnhancedActionKeyMapping>& ConstMappings = NewMappingContext->GetMappings();
 	TArray<FEnhancedActionKeyMapping>& Mappings = const_cast<TArray<FEnhancedActionKeyMapping>&>(ConstMappings);
 
-	// WASD Forward (W key)
+	// WASD Forward (W key) - positive Y
 	FEnhancedActionKeyMapping& WASDForward = Mappings.AddDefaulted_GetRef();
 	WASDForward.Action = MoveAction;
 	WASDForward.Key = EKeys::W;
 	UInputModifierSwizzleAxis* WSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
-	WSwizzle->Order = EInputAxisSwizzle::YXZ;
+	WSwizzle->Order = EInputAxisSwizzle::YXZ;  // Swap to send input to Y axis
 	WASDForward.Modifiers.Add(WSwizzle);
 
-	// WASD Backward (S key)  
+	// WASD Backward (S key) - negative Y
 	FEnhancedActionKeyMapping& WASDBackward = Mappings.AddDefaulted_GetRef();
 	WASDBackward.Action = MoveAction;
 	WASDBackward.Key = EKeys::S;
 	UInputModifierSwizzleAxis* SSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
-	SSwizzle->Order = EInputAxisSwizzle::YXZ;
+	SSwizzle->Order = EInputAxisSwizzle::YXZ;  // Swap to send input to Y axis
 	UInputModifierNegate* SNegate = NewObject<UInputModifierNegate>(NewMappingContext);
 	WASDBackward.Modifiers.Add(SSwizzle);
 	WASDBackward.Modifiers.Add(SNegate);
@@ -745,6 +771,71 @@ UInputMappingContext* USpriteSheetProcessor::CreateInputMappingContext(const FSt
 	FEnhancedActionKeyMapping& LeftMouseAttack = Mappings.AddDefaulted_GetRef();
 	LeftMouseAttack.Action = AttackAction;
 	LeftMouseAttack.Key = EKeys::LeftMouseButton;
+
+	// PS5 Controller (Generic USB Controller) Movement - Left Stick
+	// Left Stick X-Axis (GenericUSBController_Axis5 for horizontal movement)
+	FEnhancedActionKeyMapping& PS5LeftStickX = Mappings.AddDefaulted_GetRef();
+	PS5LeftStickX.Action = MoveAction;
+	PS5LeftStickX.Key = FKey("GenericUSBController_Axis5");
+	// Add Swizzle modifier to Axis 5
+	UInputModifierSwizzleAxis* PS5XSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
+	PS5XSwizzle->Order = EInputAxisSwizzle::YXZ;  // Swap to send input to Y axis
+	// Add Dead Zone modifier with lower threshold 0.2, upper 1.0, and Smoothed Radial type
+	UInputModifierDeadZone* PS5XDeadZone = NewObject<UInputModifierDeadZone>(NewMappingContext);
+	PS5XDeadZone->LowerThreshold = 0.2f;
+	PS5XDeadZone->UpperThreshold = 1.0f;
+	PS5XDeadZone->Type = EDeadZoneType::Radial;
+	PS5LeftStickX.Modifiers.Add(PS5XSwizzle);
+	PS5LeftStickX.Modifiers.Add(PS5XDeadZone);
+
+	// Left Stick Y-Axis (GenericUSBController_Axis6 for vertical movement)
+	FEnhancedActionKeyMapping& PS5LeftStickY = Mappings.AddDefaulted_GetRef();
+	PS5LeftStickY.Action = MoveAction;
+	PS5LeftStickY.Key = FKey("GenericUSBController_Axis6");
+	// Add Dead Zone modifier with lower threshold 0.2, upper 1.0 (no Swizzle)
+	UInputModifierDeadZone* PS5YDeadZone = NewObject<UInputModifierDeadZone>(NewMappingContext);
+	PS5YDeadZone->LowerThreshold = 0.2f;
+	PS5YDeadZone->UpperThreshold = 1.0f;
+	PS5LeftStickY.Modifiers.Add(PS5YDeadZone);
+
+	// PS5 Controller Attack Buttons
+	// Cross button (X) - GenericUSBController_Button1
+	FEnhancedActionKeyMapping& PS5CrossAttack = Mappings.AddDefaulted_GetRef();
+	PS5CrossAttack.Action = AttackAction;
+	PS5CrossAttack.Key = FKey("GenericUSBController_Button1");
+
+	// Circle button (O) - Alternative attack button
+	FEnhancedActionKeyMapping& PS5CircleAttack = Mappings.AddDefaulted_GetRef();
+	PS5CircleAttack.Action = AttackAction;
+	PS5CircleAttack.Key = FKey("GenericUSBController_Button2");
+
+	// R2 Trigger - GenericUSBController_Axis8
+	FEnhancedActionKeyMapping& PS5R2Attack = Mappings.AddDefaulted_GetRef();
+	PS5R2Attack.Action = AttackAction;
+	PS5R2Attack.Key = FKey("GenericUSBController_Axis8");
+
+	// Standard Gamepad Support (for Xbox and other controllers)
+	// Left Stick Movement
+	FEnhancedActionKeyMapping& GamepadLeftStickX = Mappings.AddDefaulted_GetRef();
+	GamepadLeftStickX.Action = MoveAction;
+	GamepadLeftStickX.Key = EKeys::Gamepad_LeftX;
+
+	FEnhancedActionKeyMapping& GamepadLeftStickY = Mappings.AddDefaulted_GetRef();
+	GamepadLeftStickY.Action = MoveAction;
+	GamepadLeftStickY.Key = EKeys::Gamepad_LeftY;
+	UInputModifierSwizzleAxis* GamepadYSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
+	GamepadYSwizzle->Order = EInputAxisSwizzle::YXZ;  // Swap to send input to Y axis
+	GamepadLeftStickY.Modifiers.Add(GamepadYSwizzle);
+
+	// Gamepad Face Button South (A on Xbox, X on PlayStation)
+	FEnhancedActionKeyMapping& GamepadFaceButtonAttack = Mappings.AddDefaulted_GetRef();
+	GamepadFaceButtonAttack.Action = AttackAction;
+	GamepadFaceButtonAttack.Key = EKeys::Gamepad_FaceButton_Bottom;
+
+	// Right Trigger Attack
+	FEnhancedActionKeyMapping& GamepadRightTriggerAttack = Mappings.AddDefaulted_GetRef();
+	GamepadRightTriggerAttack.Action = AttackAction;
+	GamepadRightTriggerAttack.Key = EKeys::Gamepad_RightTriggerAxis;
 
 	// Save the input mapping context
 	FAssetRegistryModule::AssetCreated(NewMappingContext);
