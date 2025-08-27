@@ -65,7 +65,7 @@ bool UCameraPawnCreationCommandlet::CreateCameraPawnClass()
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("Creating CameraPawn class..."));
     
     FString ProjectDir = FPaths::ProjectDir();
-    FString SourceDir = ProjectDir / TEXT("Source") / TEXT("CharacterCreationCpp");
+    FString SourceDir = ProjectDir / TEXT("Source") / TEXT("CharacterCreationCpp") / TEXT("CameraPawnCreationCommandlet");
     
     // Write header file
     FString HeaderPath = SourceDir / TEXT("CameraPawn.h");
@@ -126,15 +126,15 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnHeader()
            TEXT("    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = \"Movement\")\n")
            TEXT("    UFloatingPawnMovement* FloatingPawnMovement;\n")
            TEXT("\n")
-           TEXT("    // Input\n")
+           TEXT("    // Input - Using soft references to avoid constructor loading errors\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    UInputMappingContext* CameraMappingContext;\n")
+           TEXT("    TSoftObjectPtr<UInputMappingContext> CameraMappingContext;\n")
            TEXT("\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    UInputAction* ZoomAction;\n")
+           TEXT("    TSoftObjectPtr<UInputAction> ZoomAction;\n")
            TEXT("\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    UInputAction* RotateAction;\n")
+           TEXT("    TSoftObjectPtr<UInputAction> RotateAction;\n")
            TEXT("\n")
            TEXT("    // Input callbacks\n")
            TEXT("    void Zoom(const FInputActionValue& Value);\n")
@@ -180,9 +180,9 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT(\"SpringArm\"));\n")
            TEXT("    SpringArmComponent->SetupAttachment(RootComponent);\n")
            TEXT("    SpringArmComponent->TargetArmLength = 700.0f;\n")
-           TEXT("    SpringArmComponent->SetRelativeRotation(FRotator(0.0f, -60.0f, 0.0f));\n")
+           TEXT("    SpringArmComponent->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));\n")
            TEXT("    SpringArmComponent->bDoCollisionTest = false;\n")
-           TEXT("    SpringArmComponent->bUsePawnControlRotation = true;\n")
+           TEXT("    SpringArmComponent->bUsePawnControlRotation = false;\n")
            TEXT("\n")
            TEXT("    // Create camera component\n")
            TEXT("    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT(\"Camera\"));\n")
@@ -202,24 +202,11 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("    MaxZoomDistance = 2000.0f;\n")
            TEXT("    RotationSpeed = 100.0f;\n")
            TEXT("\n")
-           TEXT("    // Load input assets\n")
-           TEXT("    static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextFinder(TEXT(\"/Game/Input/IMC_CameraControl\"));\n")
-           TEXT("    if (MappingContextFinder.Succeeded())\n")
-           TEXT("    {\n")
-           TEXT("        CameraMappingContext = MappingContextFinder.Object;\n")
-           TEXT("    }\n")
-           TEXT("\n")
-           TEXT("    static ConstructorHelpers::FObjectFinder<UInputAction> ZoomActionFinder(TEXT(\"/Game/Input/IA_Zoom\"));\n")
-           TEXT("    if (ZoomActionFinder.Succeeded())\n")
-           TEXT("    {\n")
-           TEXT("        ZoomAction = ZoomActionFinder.Object;\n")
-           TEXT("    }\n")
-           TEXT("\n")
-           TEXT("    static ConstructorHelpers::FObjectFinder<UInputAction> RotateActionFinder(TEXT(\"/Game/Input/IA_Rotate\"));\n")
-           TEXT("    if (RotateActionFinder.Succeeded())\n")
-           TEXT("    {\n")
-           TEXT("        RotateAction = RotateActionFinder.Object;\n")
-           TEXT("    }\n")
+           TEXT("    // Set default paths for input assets using soft references\n")
+           TEXT("    // These will be loaded when needed, not during constructor\n")
+           TEXT("    CameraMappingContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath(TEXT(\"/Game/Input/IMC_CameraControl\")));\n")
+           TEXT("    ZoomAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT(\"/Game/Input/IA_Zoom\")));\n")
+           TEXT("    RotateAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT(\"/Game/Input/IA_Rotate\")));\n")
            TEXT("}\n")
            TEXT("\n")
            TEXT("void ACameraPawn::BeginPlay()\n")
@@ -231,9 +218,14 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("    {\n")
            TEXT("        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))\n")
            TEXT("        {\n")
-           TEXT("            if (CameraMappingContext)\n")
+           TEXT("            // Load and add mapping context if it exists\n")
+           TEXT("            if (!CameraMappingContext.IsNull())\n")
            TEXT("            {\n")
-           TEXT("                Subsystem->AddMappingContext(CameraMappingContext, 0);\n")
+           TEXT("                UInputMappingContext* LoadedContext = CameraMappingContext.LoadSynchronous();\n")
+           TEXT("                if (LoadedContext)\n")
+           TEXT("                {\n")
+           TEXT("                    Subsystem->AddMappingContext(LoadedContext, 0);\n")
+           TEXT("                }\n")
            TEXT("            }\n")
            TEXT("        }\n")
            TEXT("    }\n")
@@ -245,16 +237,24 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("\n")
            TEXT("    if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))\n")
            TEXT("    {\n")
-           TEXT("        // Bind zoom action\n")
-           TEXT("        if (ZoomAction)\n")
+           TEXT("        // Load and bind zoom action if it exists\n")
+           TEXT("        if (!ZoomAction.IsNull())\n")
            TEXT("        {\n")
-           TEXT("            EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &ACameraPawn::Zoom);\n")
+           TEXT("            UInputAction* LoadedZoomAction = ZoomAction.LoadSynchronous();\n")
+           TEXT("            if (LoadedZoomAction)\n")
+           TEXT("            {\n")
+           TEXT("                EnhancedInputComponent->BindAction(LoadedZoomAction, ETriggerEvent::Triggered, this, &ACameraPawn::Zoom);\n")
+           TEXT("            }\n")
            TEXT("        }\n")
            TEXT("\n")
-           TEXT("        // Bind rotate action\n")
-           TEXT("        if (RotateAction)\n")
+           TEXT("        // Load and bind rotate action if it exists\n")
+           TEXT("        if (!RotateAction.IsNull())\n")
            TEXT("        {\n")
-           TEXT("            EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ACameraPawn::Rotate);\n")
+           TEXT("            UInputAction* LoadedRotateAction = RotateAction.LoadSynchronous();\n")
+           TEXT("            if (LoadedRotateAction)\n")
+           TEXT("            {\n")
+           TEXT("                EnhancedInputComponent->BindAction(LoadedRotateAction, ETriggerEvent::Triggered, this, &ACameraPawn::Rotate);\n")
+           TEXT("            }\n")
            TEXT("        }\n")
            TEXT("    }\n")
            TEXT("}\n")
@@ -523,8 +523,8 @@ void UCameraPawnCreationCommandlet::PrintSuccess() const
     UE_LOG(LogCameraPawnCreation, Warning, TEXT(""));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("Created Files:"));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-    UE_LOG(LogCameraPawnCreation, Warning, TEXT("📄 CameraPawn.h"));
-    UE_LOG(LogCameraPawnCreation, Warning, TEXT("📄 CameraPawn.cpp"));
+    UE_LOG(LogCameraPawnCreation, Warning, TEXT("📄 Source/CharacterCreationCpp/CameraPawnCreationCommandlet/CameraPawn.h"));
+    UE_LOG(LogCameraPawnCreation, Warning, TEXT("📄 Source/CharacterCreationCpp/CameraPawnCreationCommandlet/CameraPawn.cpp"));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT(""));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("Created Assets:"));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
@@ -540,4 +540,7 @@ void UCameraPawnCreationCommandlet::PrintSuccess() const
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("🚫 Collision Test: Disabled"));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT(""));
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("📋 Remember to rebuild the project to compile the new C++ classes!"));
+    UE_LOG(LogCameraPawnCreation, Warning, TEXT(""));
+    UE_LOG(LogCameraPawnCreation, Warning, TEXT("ℹ️  Note: Generated code uses soft references (TSoftObjectPtr) for input assets"));
+    UE_LOG(LogCameraPawnCreation, Warning, TEXT("   to prevent CDO constructor errors and improve loading performance."));
 }

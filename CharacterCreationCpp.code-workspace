@@ -479,9 +479,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -497,9 +495,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -515,9 +511,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -533,9 +527,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -551,9 +543,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -570,9 +560,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -589,9 +577,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -608,9 +594,7 @@
 				"type": "cppvsdbg",
 				"visualizerFile": "C:\\Epic Games\\UE_5.5\\Engine\\Extras\\VisualStudioDebugging\\Unreal.natvis",
 				"sourceFileMap": {
-					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5",
-					"Z:\\UEVFS\\CharacterCreationCpp": "C:\\Users\\ahmed\\Documents\\Unreal Projects\\CharacterCreationCpp",
-					"Z:\\UEVFS\\Root": "C:\\Epic Games\\UE_5.5"
+					"D:\\build\\++UE5\\Sync": "C:\\Epic Games\\UE_5.5"
 				}
 			},
 			{
@@ -636,7 +620,7 @@
 				},
 				"console": "integratedTerminal",
 				"stopAtEntry": false,
-				"cwd": "C:\\Program Files\\Epic Games\\UE_5.6"
+				"cwd": "C:\\Epic Games\\UE_5.5"
 			}
 		]
 	}

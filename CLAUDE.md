@@ -27,6 +27,9 @@ This is an Unreal Engine 5.5 C++ project called "CharacterCreationCpp" designed 
 # Run CharacterCreationCommandlet (processes sprite sheets)
 & "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=CharacterCreationCommandlet -batch -nullrhi -nosplash -nopause
 
+# Run CameraPawnCreationCommandlet (creates camera pawn and related assets)
+& "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=CameraPawnCreationCommandlet -nullrhi -nosplash -nopause
+
 # Run LevelCreationCommandlet (creates Map1)
 & "C:\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "C:\Users\ahmed\Documents\Unreal Projects\CharacterCreationCpp\CharacterCreationCpp.uproject" -run=LevelCreationCommandlet -nullrhi -nosplash -nopause
 
@@ -57,8 +60,10 @@ Source/
     ├── CharacterCreationCpp.h              # Main module header
     ├── CharacterCreationCpp.cpp             # Main module implementation
     ├── CharacterCreationCommandlet/        # Sprite processing commandlet
+    ├── CameraPawnCreationCommandlet/       # Camera pawn creation commandlet
     ├── LevelCreationCommandlet/            # Level creation commandlet
     ├── GameModeCreationCommandlet/         # Game mode creation commandlet
+    ├── CameraPawn.cpp/h                    # Camera pawn class
     ├── MyGameMode.cpp/h                    # Custom game mode
     └── Warrior*Character.cpp/h             # Generated character classes
 ```

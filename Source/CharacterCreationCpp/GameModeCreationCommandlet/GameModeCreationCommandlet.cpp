@@ -21,7 +21,7 @@ UGameModeCreationCommandlet::UGameModeCreationCommandlet()
 int32 UGameModeCreationCommandlet::Main(const FString& Params)
 {
     UE_LOG(LogGameModeCreation, Warning, TEXT("=== Game Mode Creation Commandlet Started ==="));
-    UE_LOG(LogGameModeCreation, Warning, TEXT("Creating MyGameMode with WarriorPurpleCharacter as default pawn..."));
+    UE_LOG(LogGameModeCreation, Warning, TEXT("Creating MyGameMode with CameraPawn as default pawn..."));
     
     bool bSuccess = true;
     
@@ -55,11 +55,11 @@ int32 UGameModeCreationCommandlet::Main(const FString& Params)
         UE_LOG(LogGameModeCreation, Warning, TEXT("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
         UE_LOG(LogGameModeCreation, Warning, TEXT(""));
         UE_LOG(LogGameModeCreation, Warning, TEXT("Created Files:"));
-        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Source/CharacterCreationCpp/MyGameMode.h"));
-        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Source/CharacterCreationCpp/MyGameMode.cpp"));
+        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Source/CharacterCreationCpp/GameModeCreationCommandlet/MyGameMode.h"));
+        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Source/CharacterCreationCpp/GameModeCreationCommandlet/MyGameMode.cpp"));
         UE_LOG(LogGameModeCreation, Warning, TEXT(""));
         UE_LOG(LogGameModeCreation, Warning, TEXT("Configuration:"));
-        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Default Pawn Class: WarriorPurpleCharacter"));
+        UE_LOG(LogGameModeCreation, Warning, TEXT("  • Default Pawn Class: CameraPawn"));
         UE_LOG(LogGameModeCreation, Warning, TEXT("  • Default Game Mode: MyGameMode"));
         UE_LOG(LogGameModeCreation, Warning, TEXT(""));
         UE_LOG(LogGameModeCreation, Warning, TEXT("⚠️  IMPORTANT: Recompile the project to use the new game mode!"));
@@ -77,7 +77,7 @@ bool UGameModeCreationCommandlet::CreateGameModeClass()
 {
     // Get the source directory path
     FString ProjectDir = FPaths::ProjectDir();
-    FString SourceDir = FPaths::Combine(ProjectDir, TEXT("Source"), TEXT("CharacterCreationCpp"));
+    FString SourceDir = FPaths::Combine(ProjectDir, TEXT("Source"), TEXT("CharacterCreationCpp"), TEXT("GameModeCreationCommandlet"));
     
     // Create file paths
     FString HeaderPath = FPaths::Combine(SourceDir, TEXT("MyGameMode.h"));
@@ -115,7 +115,7 @@ FString UGameModeCreationCommandlet::GenerateGameModeHeader()
            TEXT("#include \"MyGameMode.generated.h\"\n")
            TEXT("\n")
            TEXT("/**\n")
-           TEXT(" * Custom game mode that uses WarriorPurpleCharacter as the default pawn\n")
+           TEXT(" * Custom game mode that uses CameraPawn as the default pawn\n")
            TEXT(" */\n")
            TEXT("UCLASS()\n")
            TEXT("class CHARACTERCREATIONCPP_API AMyGameMode : public AGameModeBase\n")
@@ -137,24 +137,24 @@ FString UGameModeCreationCommandlet::GenerateGameModeHeader()
 FString UGameModeCreationCommandlet::GenerateGameModeCpp()
 {
     return TEXT("#include \"MyGameMode.h\"\n")
-           TEXT("#include \"CharacterCreationCommandlet/WarriorPurpleCharacter.h\"\n")
+           TEXT("#include \"../CameraPawnCreationCommandlet/CameraPawn.h\"\n")
            TEXT("#include \"Engine/Engine.h\"\n")
            TEXT("#include \"Kismet/GameplayStatics.h\"\n")
            TEXT("\n")
            TEXT("AMyGameMode::AMyGameMode()\n")
            TEXT("{\n")
-           TEXT("    // Set WarriorPurpleCharacter as the default pawn class\n")
-           TEXT("    static ConstructorHelpers::FClassFinder<APawn> PawnClassFinder(TEXT(\"/Script/CharacterCreationCpp.WarriorPurpleCharacter\"));\n")
+           TEXT("    // Set CameraPawn as the default pawn class\n")
+           TEXT("    static ConstructorHelpers::FClassFinder<APawn> PawnClassFinder(TEXT(\"/Script/CharacterCreationCpp.CameraPawn\"));\n")
            TEXT("    if (PawnClassFinder.Succeeded())\n")
            TEXT("    {\n")
            TEXT("        DefaultPawnClass = PawnClassFinder.Class;\n")
-           TEXT("        UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Successfully set WarriorPurpleCharacter as default pawn\"));\n")
+           TEXT("        UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Successfully set CameraPawn as default pawn\"));\n")
            TEXT("    }\n")
            TEXT("    else\n")
            TEXT("    {\n")
            TEXT("        // Fallback: Try to load the class dynamically\n")
-           TEXT("        DefaultPawnClass = AWarriorPurpleCharacter::StaticClass();\n")
-           TEXT("        UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Set WarriorPurpleCharacter using StaticClass()\"));\n")
+           TEXT("        DefaultPawnClass = ACameraPawn::StaticClass();\n")
+           TEXT("        UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Set CameraPawn using StaticClass()\"));\n")
            TEXT("    }\n")
            TEXT("    \n")
            TEXT("    // Log the default pawn class for debugging\n")
@@ -168,7 +168,7 @@ FString UGameModeCreationCommandlet::GenerateGameModeCpp()
            TEXT("{\n")
            TEXT("    Super::BeginPlay();\n")
            TEXT("    \n")
-           TEXT("    UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Game mode started with WarriorPurpleCharacter as default pawn\"));\n")
+           TEXT("    UE_LOG(LogTemp, Warning, TEXT(\"MyGameMode: Game mode started with CameraPawn as default pawn\"));\n")
            TEXT("    \n")
            TEXT("    // Verify the default pawn class is set\n")
            TEXT("    if (DefaultPawnClass)\n")

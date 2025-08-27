@@ -27,7 +27,8 @@ private:
 	class AVolumetricCloud* SpawnVolumetricCloud(class UWorld* World);
 	class AExponentialHeightFog* SpawnExponentialHeightFog(class UWorld* World);
 	class AStaticMeshActor* SpawnPlaneActor(class UWorld* World);
-	class AWarriorPurpleCharacter* SpawnWarriorPurpleCharacter(class UWorld* World, const FVector& Location);
+	class APlayerStart* SpawnPlayerStart(class UWorld* World, const FVector& Location);
+	class AWarriorCharacter* SpawnWarriorPurpleCharacter(class UWorld* World, const FVector& Location);
 	
 	// Utility
 	void PrintUsage() const;

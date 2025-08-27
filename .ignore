@@ -1,9 +1,13 @@
+/.claude
 /.git
+/.github
+/.idea
 /.vs
 /.vscode
 /archive
 /ClaudeCodeChatHistory
 /Content
+/DerivedDataCache
 /Intermediate
 /RawAssets
 /Saved

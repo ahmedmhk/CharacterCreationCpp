@@ -23,17 +23,13 @@ class CHARACTERCREATIONCPP_API AWarriorCharacter : public APaperCharacter
 
 public:
     AWarriorCharacter();
-    virtual void PostInitializeComponents() override;
 
 protected:
     virtual void BeginPlay() override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     
     // Virtual method for derived classes to override
-    virtual void LoadAnimations();
-    
-    // Load input assets (called from BeginPlay)
-    void LoadInputAssets();
+    virtual void LoadAnimationsForCharacter();
 
     // Animation references - editable in Blueprint defaults
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Animations")
@@ -146,14 +142,15 @@ public:
 protected:
     // Enhanced Input functions
     void Move(const FInputActionValue& Value);
-    void StopMove(const FInputActionValue& Value);
     void Attack(const FInputActionValue& Value);
 
     // Animation functions
     void SetAnimation(UPaperFlipbook* NewAnimation);
     void UpdateSpriteDirection();
     void EndAttack();
+    void LoadAnimations();
     void LoadAndAssignAnimations();
+    void TryLoadAnimationsForEditor();
     void TryLoadInputAssetsForEditor();
 
 private:

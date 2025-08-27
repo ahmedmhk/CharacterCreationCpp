@@ -346,7 +346,7 @@ bool UCharacterCreationCommandlet::GenerateCharacterClass(const FString& Charact
 
 bool UCharacterCreationCommandlet::WriteCharacterHeaderFile(const FString& CharacterName, const FString& TextureName)
 {
-	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/");
+	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/CharacterCreationCommandlet/");
 	if (!FPaths::DirectoryExists(SourceDir))
 	{
 		UE_LOG(LogCharacterCreation, Error, TEXT("Source directory does not exist: %s"), *SourceDir);
@@ -360,7 +360,7 @@ bool UCharacterCreationCommandlet::WriteCharacterHeaderFile(const FString& Chara
 		"#pragma once\n"
 		"\n"
 		"#include \"CoreMinimal.h\"\n"
-		"#include \"WarriorCharacter.h\"\n"
+		"#include \"../WarriorCharacter.h\"\n"
 		"#include \"%s.generated.h\"\n"
 		"\n"
 		"UCLASS()\n"
@@ -390,7 +390,7 @@ bool UCharacterCreationCommandlet::WriteCharacterHeaderFile(const FString& Chara
 
 bool UCharacterCreationCommandlet::WriteCharacterSourceFile(const FString& CharacterName, const FString& TextureName)
 {
-	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/");
+	FString SourceDir = FPaths::ProjectDir() / TEXT("Source/CharacterCreationCpp/CharacterCreationCommandlet/");
 	if (!FPaths::DirectoryExists(SourceDir))
 	{
 		UE_LOG(LogCharacterCreation, Error, TEXT("Source directory does not exist: %s"), *SourceDir);
@@ -404,7 +404,7 @@ bool UCharacterCreationCommandlet::WriteCharacterSourceFile(const FString& Chara
 	SourceContent.Appendf(TEXT("#include \"%s.h\"\n"), *CharacterName);
 	SourceContent.Append(TEXT("#include \"PaperFlipbook.h\"\n"));
 	SourceContent.Append(TEXT("#include \"PaperFlipbookComponent.h\"\n"));
-	SourceContent.Append(TEXT("#include \"CharacterCreationLog.h\"\n"));
+	SourceContent.Append(TEXT("#include \"../CharacterCreationLog.h\"\n"));
 	SourceContent.Append(TEXT("\n"));
 	SourceContent.Appendf(TEXT("A%s::A%s()\n"), *CharacterName, *CharacterName);
 	SourceContent.Append(TEXT("{\n"));

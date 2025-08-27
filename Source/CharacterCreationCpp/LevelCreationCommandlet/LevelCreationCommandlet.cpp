@@ -21,7 +21,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/GarbageCollection.h"
-#include "../WarriorPurpleCharacter.h"
+#include "../CharacterCreationCommandlet/WarriorCharacter.h"
 #include "GameFramework/PlayerStart.h"
 #include "PaperFlipbook.h"
 #include "PaperFlipbookComponent.h"
@@ -214,13 +214,23 @@ bool ULevelCreationCommandlet::SpawnEnvironmentalActors(UWorld* World)
 	}
 	UE_LOG(LogLevelCreation, Warning, TEXT("✓ Plane Actor spawned"));
 
-	// 7. Spawn Warrior Purple Character on top of the plane
+	// 7. Spawn PlayerStart for proper player spawning
 	// Calculate spawn location: plane is at (0,0,0) with scale 8x8x8
 	// The plane mesh is 100x100 units by default, so scaled it's 800x800 units
-	// Spawn character slightly above the plane surface
-	FVector CharacterSpawnLocation(0.0f, 0.0f, 50.0f); // 50 units above plane center
+	// Spawn PlayerStart slightly above the plane surface
+	FVector PlayerStartLocation(0.0f, 0.0f, 50.0f); // 50 units above plane center
 	
-	AWarriorPurpleCharacter* WarriorCharacter = SpawnWarriorPurpleCharacter(World, CharacterSpawnLocation);
+	APlayerStart* PlayerStart = SpawnPlayerStart(World, PlayerStartLocation);
+	if (!PlayerStart)
+	{
+		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn PlayerStart"));
+		return false;
+	}
+	UE_LOG(LogLevelCreation, Warning, TEXT("✓ PlayerStart spawned at location: %s"), *PlayerStartLocation.ToString());
+	
+	// 8. Spawn Warrior Purple Character on top of the plane
+	FVector CharacterSpawnLocation(100.0f, 0.0f, 50.0f); // Slightly offset from PlayerStart
+	AWarriorCharacter* WarriorCharacter = SpawnWarriorPurpleCharacter(World, CharacterSpawnLocation);
 	if (!WarriorCharacter)
 	{
 		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn Warrior Purple Character"));
@@ -428,6 +438,39 @@ AStaticMeshActor* ULevelCreationCommandlet::SpawnPlaneActor(UWorld* World)
 	return PlaneActor;
 }
 
+APlayerStart* ULevelCreationCommandlet::SpawnPlayerStart(UWorld* World, const FVector& Location)
+{
+	if (!World)
+	{
+		return nullptr;
+	}
+
+	UE_LOG(LogLevelCreation, Warning, TEXT("Spawning PlayerStart..."));
+
+	// Spawn PlayerStart at the specified location
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
+		APlayerStart::StaticClass(),
+		Location,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	if (PlayerStart)
+	{
+		PlayerStart->SetActorLabel(TEXT("PlayerStart"));
+		UE_LOG(LogLevelCreation, Warning, TEXT("✓ PlayerStart spawned successfully"));
+	}
+	else
+	{
+		UE_LOG(LogLevelCreation, Error, TEXT("Failed to spawn PlayerStart"));
+	}
+
+	return PlayerStart;
+}
+
 bool ULevelCreationCommandlet::SaveLevel(UWorld* World, const FString& PackageName)
 {
 	if (!World)
@@ -601,7 +644,7 @@ bool ULevelCreationCommandlet::ValidateAndSanitizePath(FString& Path) const
 	return true;
 }
 
-AWarriorPurpleCharacter* ULevelCreationCommandlet::SpawnWarriorPurpleCharacter(UWorld* World, const FVector& Location)
+AWarriorCharacter* ULevelCreationCommandlet::SpawnWarriorPurpleCharacter(UWorld* World, const FVector& Location)
 {
 	if (!World)
 	{
@@ -610,35 +653,18 @@ AWarriorPurpleCharacter* ULevelCreationCommandlet::SpawnWarriorPurpleCharacter(U
 
 	UE_LOG(LogLevelCreation, Warning, TEXT("Spawning Warrior Purple Character..."));
 
-	// First, spawn a PlayerStart at the location for proper player spawning
-	FActorSpawnParameters PlayerStartParams;
-	PlayerStartParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
-	APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
-		APlayerStart::StaticClass(),
-		Location,
-		FRotator::ZeroRotator,
-		PlayerStartParams
-	);
-
-	if (PlayerStart)
-	{
-		PlayerStart->SetActorLabel(TEXT("PlayerStart_WarriorPurple"));
-		UE_LOG(LogLevelCreation, Warning, TEXT("✓ PlayerStart spawned for character"));
-	}
-
-	// Now spawn the Warrior Purple Character
+	// Spawn the Warrior Purple Character
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	
 	// Use the C++ class directly
-	UClass* WarriorPurpleClass = AWarriorPurpleCharacter::StaticClass();
-	UE_LOG(LogLevelCreation, Warning, TEXT("Using C++ class AWarriorPurpleCharacter"));
+	UClass* WarriorClass = AWarriorCharacter::StaticClass();
+	UE_LOG(LogLevelCreation, Warning, TEXT("Using C++ class AWarriorCharacter"));
 
-	AWarriorPurpleCharacter* WarriorCharacter = World->SpawnActor<AWarriorPurpleCharacter>(
-		WarriorPurpleClass,
+	AWarriorCharacter* WarriorCharacter = World->SpawnActor<AWarriorCharacter>(
+		WarriorClass,
 		Location,
-		FRotator::ZeroRotator,
+		FRotator(0, 90, 0), // Facing right
 		SpawnParams
 	);
 
@@ -647,21 +673,35 @@ AWarriorPurpleCharacter* ULevelCreationCommandlet::SpawnWarriorPurpleCharacter(U
 		// Set some initial properties
 		WarriorCharacter->SetActorLabel(TEXT("WarriorPurpleCharacter"));
 		
-		// Make sure the character is set to possess
-		WarriorCharacter->AutoPossessPlayer = EAutoReceiveInput::Player0;
+		// Make sure the character is set to unpossessed
+		WarriorCharacter->AutoPossessPlayer = EAutoReceiveInput::Disabled;
 		
-		// Set up a default visible sprite
+		// Set up purple-specific animations
 		UPaperFlipbookComponent* SpriteComponent = WarriorCharacter->GetSprite();
 		if (SpriteComponent)
 		{
-			// Load the idle animation flipbook as default
+			// Load the purple idle animation flipbook as default
 			UPaperFlipbook* IdleFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle_Warrior_Purple"));
 			if (IdleFlipbook)
 			{
+				WarriorCharacter->SetIdleAnimation(IdleFlipbook);
 				SpriteComponent->SetFlipbook(IdleFlipbook);
 				SpriteComponent->SetVisibility(true);
 				SpriteComponent->SetHiddenInGame(false);
-				UE_LOG(LogLevelCreation, Warning, TEXT("✓ Set default Idle animation on character sprite"));
+				UE_LOG(LogLevelCreation, Warning, TEXT("✓ Set purple idle animation on character"));
+				
+				// Also load other purple animations
+				UPaperFlipbook* MoveFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Move_Warrior_Purple"));
+				if (MoveFlipbook) WarriorCharacter->SetMoveAnimation(MoveFlipbook);
+				
+				UPaperFlipbook* AttackUpFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards_Warrior_Purple"));
+				if (AttackUpFlipbook) WarriorCharacter->SetAttackUpAnimation(AttackUpFlipbook);
+				
+				UPaperFlipbook* AttackDownFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards_Warrior_Purple"));
+				if (AttackDownFlipbook) WarriorCharacter->SetAttackDownAnimation(AttackDownFlipbook);
+				
+				UPaperFlipbook* AttackSideFlipbook = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways_Warrior_Purple"));
+				if (AttackSideFlipbook) WarriorCharacter->SetAttackSideAnimation(AttackSideFlipbook);
 			}
 			else
 			{

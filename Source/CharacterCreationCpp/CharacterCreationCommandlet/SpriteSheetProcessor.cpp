@@ -798,21 +798,11 @@ UInputMappingContext* USpriteSheetProcessor::CreateInputMappingContext(const FSt
 	PS5YDeadZone->UpperThreshold = 1.0f;
 	PS5LeftStickY.Modifiers.Add(PS5YDeadZone);
 
-	// PS5 Controller Attack Buttons
-	// Cross button (X) - GenericUSBController_Button1
+	// PS5 Controller Attack Button
+	// Cross button (X) - GenericUSBController_Button1 (ONLY button for attack)
 	FEnhancedActionKeyMapping& PS5CrossAttack = Mappings.AddDefaulted_GetRef();
 	PS5CrossAttack.Action = AttackAction;
 	PS5CrossAttack.Key = FKey("GenericUSBController_Button1");
-
-	// Circle button (O) - Alternative attack button
-	FEnhancedActionKeyMapping& PS5CircleAttack = Mappings.AddDefaulted_GetRef();
-	PS5CircleAttack.Action = AttackAction;
-	PS5CircleAttack.Key = FKey("GenericUSBController_Button2");
-
-	// R2 Trigger - GenericUSBController_Axis8
-	FEnhancedActionKeyMapping& PS5R2Attack = Mappings.AddDefaulted_GetRef();
-	PS5R2Attack.Action = AttackAction;
-	PS5R2Attack.Key = FKey("GenericUSBController_Axis8");
 
 	// Standard Gamepad Support (for Xbox and other controllers)
 	// Left Stick Movement

@@ -64,6 +64,9 @@ Saved/
 *.out
 *.app
 
+#Images
+*.png
+
 # Unreal Engine cache and intermediate files
 .vscode/
 .idea/
