@@ -18,6 +18,7 @@ class CHARACTERCREATIONCPP_API ACameraPawn : public APawn
 
 public:
     ACameraPawn();
+    virtual void Tick(float DeltaTime) override;
 
 protected:
     virtual void BeginPlay() override;
@@ -33,15 +34,15 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
     UFloatingPawnMovement* FloatingPawnMovement;
 
-    // Input - Using soft references to avoid constructor loading errors
+    // Input - Using direct references for reliability
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    TSoftObjectPtr<UInputMappingContext> CameraMappingContext;
+    UInputMappingContext* CameraMappingContext;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    TSoftObjectPtr<UInputAction> ZoomAction;
+    UInputAction* ZoomAction;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    TSoftObjectPtr<UInputAction> RotateAction;
+    UInputAction* RotateAction;
 
     // Input callbacks
     void Zoom(const FInputActionValue& Value);
@@ -59,4 +60,18 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
     float RotationSpeed;
+
+    // Smooth interpolation
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.1", ClampMax = "20.0"))
+    float ZoomSmoothSpeed = 8.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera", meta = (ClampMin = "0.1", ClampMax = "20.0"))
+    float RotationSmoothSpeed = 10.0f;
+
+private:
+    // Target values for smooth interpolation
+    float TargetArmLength;
+    FRotator TargetRotation;
+    float ZoomInputValue;
+    FVector2D RotationInputValue;
 };

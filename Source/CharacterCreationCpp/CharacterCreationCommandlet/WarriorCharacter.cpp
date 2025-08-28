@@ -30,22 +30,25 @@ AWarriorCharacter::AWarriorCharacter()
     GetCharacterMovement()->bConstrainToPlane = true;
     GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0, 1, 0));
 
-    // Configure capsule collision
-    GetCapsuleComponent()->SetCapsuleHalfHeight(50.0f);
-    GetCapsuleComponent()->SetCapsuleRadius(25.0f);
+    // Configure capsule collision - set default values (will be overridden in BeginPlay)
+    GetCapsuleComponent()->SetCapsuleHalfHeight(34.0f);
+    GetCapsuleComponent()->SetCapsuleRadius(20.0f);
 
     // Get sprite component reference
     SpriteComponent = GetSprite();
     if (SpriteComponent)
     {
         SpriteComponent->SetRelativeRotation(FRotator(0, 0, 0)); // Align vertically with capsule
+        // Position sprite so feet touch bottom of capsule
+        // We want the sprite's bottom to align with capsule bottom
+        SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -7.0f));
     }
 
     // Create SpringArm component
     SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
     SpringArmComponent->SetupAttachment(RootComponent);
     SpringArmComponent->TargetArmLength = 200.0f;
-    SpringArmComponent->SetWorldRotation(FRotator(0.0f, -90.0f, 0.0f)); // Side view angle
+    SpringArmComponent->SetWorldRotation(FRotator(0.0f, 0.0f, 0.0f));
     SpringArmComponent->bDoCollisionTest = false;
     SpringArmComponent->bInheritPitch = false;
     SpringArmComponent->bInheritYaw = false;
@@ -68,6 +71,15 @@ AWarriorCharacter::AWarriorCharacter()
 void AWarriorCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    
+    // Override capsule size at runtime to bypass editor constraints
+    GetCapsuleComponent()->SetCapsuleSize(20.0f, 20.0f, false);
+    
+    // Adjust sprite position for new capsule size
+    if (SpriteComponent)
+    {
+        SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -7.0f));
+    }
     
     // Setup Enhanced Input
     APlayerController* PlayerController = Cast<APlayerController>(GetController());

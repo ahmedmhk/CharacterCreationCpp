@@ -7,7 +7,10 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "EnhancedInput/Public/InputModifiers.h"
 #include "Engine/Engine.h"
+#include "Modules/ModuleManager.h"
+#include "Misc/PackageName.h"
 
 UCameraPawnCreationCommandlet::UCameraPawnCreationCommandlet()
 {
@@ -111,6 +114,7 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnHeader()
            TEXT("\n")
            TEXT("public:\n")
            TEXT("    ACameraPawn();\n")
+           TEXT("    virtual void Tick(float DeltaTime) override;\n")
            TEXT("\n")
            TEXT("protected:\n")
            TEXT("    virtual void BeginPlay() override;\n")
@@ -126,15 +130,15 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnHeader()
            TEXT("    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = \"Movement\")\n")
            TEXT("    UFloatingPawnMovement* FloatingPawnMovement;\n")
            TEXT("\n")
-           TEXT("    // Input - Using soft references to avoid constructor loading errors\n")
+           TEXT("    // Input - Using direct references for reliability\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    TSoftObjectPtr<UInputMappingContext> CameraMappingContext;\n")
+           TEXT("    UInputMappingContext* CameraMappingContext;\n")
            TEXT("\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    TSoftObjectPtr<UInputAction> ZoomAction;\n")
+           TEXT("    UInputAction* ZoomAction;\n")
            TEXT("\n")
            TEXT("    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = \"Input\")\n")
-           TEXT("    TSoftObjectPtr<UInputAction> RotateAction;\n")
+           TEXT("    UInputAction* RotateAction;\n")
            TEXT("\n")
            TEXT("    // Input callbacks\n")
            TEXT("    void Zoom(const FInputActionValue& Value);\n")
@@ -152,6 +156,20 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnHeader()
            TEXT("\n")
            TEXT("    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Camera\")\n")
            TEXT("    float RotationSpeed;\n")
+           TEXT("\n")
+           TEXT("    // Smooth interpolation\n")
+           TEXT("    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Camera\", meta = (ClampMin = \"0.1\", ClampMax = \"20.0\"))\n")
+           TEXT("    float ZoomSmoothSpeed = 8.0f;\n")
+           TEXT("\n")
+           TEXT("    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = \"Camera\", meta = (ClampMin = \"0.1\", ClampMax = \"20.0\"))\n")
+           TEXT("    float RotationSmoothSpeed = 10.0f;\n")
+           TEXT("\n")
+           TEXT("private:\n")
+           TEXT("    // Target values for smooth interpolation\n")
+           TEXT("    float TargetArmLength;\n")
+           TEXT("    FRotator TargetRotation;\n")
+           TEXT("    float ZoomInputValue;\n")
+           TEXT("    FVector2D RotationInputValue;\n")
            TEXT("};\n");
 }
 
@@ -171,7 +189,7 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("\n")
            TEXT("ACameraPawn::ACameraPawn()\n")
            TEXT("{\n")
-           TEXT("    PrimaryActorTick.bCanEverTick = false;\n")
+           TEXT("    PrimaryActorTick.bCanEverTick = true;\n")
            TEXT("\n")
            TEXT("    // Create root component\n")
            TEXT("    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT(\"RootComponent\"));\n")
@@ -197,36 +215,134 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("    FloatingPawnMovement->Deceleration = 8000.0f;\n")
            TEXT("\n")
            TEXT("    // Set default camera settings\n")
-           TEXT("    ZoomSpeed = 50.0f;\n")
+           TEXT("    ZoomSpeed = 100.0f;  // Increased for more responsive mouse wheel zooming\n")
            TEXT("    MinZoomDistance = 200.0f;\n")
            TEXT("    MaxZoomDistance = 2000.0f;\n")
            TEXT("    RotationSpeed = 100.0f;\n")
+           TEXT("    \n")
+           TEXT("    // Initialize target values\n")
+           TEXT("    TargetArmLength = 700.0f;\n")
+           TEXT("    TargetRotation = FRotator(-60.0f, 0.0f, 0.0f);\n")
+           TEXT("    ZoomInputValue = 0.0f;\n")
+           TEXT("    RotationInputValue = FVector2D::ZeroVector;\n")
            TEXT("\n")
-           TEXT("    // Set default paths for input assets using soft references\n")
-           TEXT("    // These will be loaded when needed, not during constructor\n")
-           TEXT("    CameraMappingContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath(TEXT(\"/Game/Input/IMC_CameraControl\")));\n")
-           TEXT("    ZoomAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT(\"/Game/Input/IA_Zoom\")));\n")
-           TEXT("    RotateAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT(\"/Game/Input/IA_Rotate\")));\n")
+           TEXT("    // Load input assets directly in constructor\n")
+           TEXT("    static ConstructorHelpers::FObjectFinder<UInputMappingContext> MappingContextFinder(TEXT(\"/Game/Input/IMC_CameraControl\"));\n")
+           TEXT("    if (MappingContextFinder.Succeeded())\n")
+           TEXT("    {\n")
+           TEXT("        CameraMappingContext = MappingContextFinder.Object;\n")
+           TEXT("    }\n")
+           TEXT("    \n")
+           TEXT("    static ConstructorHelpers::FObjectFinder<UInputAction> ZoomActionFinder(TEXT(\"/Game/Input/IA_Zoom\"));\n")
+           TEXT("    if (ZoomActionFinder.Succeeded())\n")
+           TEXT("    {\n")
+           TEXT("        ZoomAction = ZoomActionFinder.Object;\n")
+           TEXT("    }\n")
+           TEXT("    \n")
+           TEXT("    static ConstructorHelpers::FObjectFinder<UInputAction> RotateActionFinder(TEXT(\"/Game/Input/IA_Rotate\"));\n")
+           TEXT("    if (RotateActionFinder.Succeeded())\n")
+           TEXT("    {\n")
+           TEXT("        RotateAction = RotateActionFinder.Object;\n")
+           TEXT("    }\n")
+           TEXT("}\n")
+           TEXT("\n")
+           TEXT("void ACameraPawn::Tick(float DeltaTime)\n")
+           TEXT("{\n")
+           TEXT("    Super::Tick(DeltaTime);\n")
+           TEXT("    \n")
+           TEXT("    if (SpringArmComponent)\n")
+           TEXT("    {\n")
+           TEXT("        // Smoothly interpolate zoom\n")
+           TEXT("        float CurrentArmLength = SpringArmComponent->TargetArmLength;\n")
+           TEXT("        float NewArmLength = FMath::FInterpTo(CurrentArmLength, TargetArmLength, DeltaTime, ZoomSmoothSpeed);\n")
+           TEXT("        SpringArmComponent->TargetArmLength = NewArmLength;\n")
+           TEXT("        \n")
+           TEXT("        // Smoothly interpolate rotation\n")
+           TEXT("        FRotator CurrentRotation = SpringArmComponent->GetRelativeRotation();\n")
+           TEXT("        FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, RotationSmoothSpeed);\n")
+           TEXT("        SpringArmComponent->SetRelativeRotation(NewRotation);\n")
+           TEXT("    }\n")
            TEXT("}\n")
            TEXT("\n")
            TEXT("void ACameraPawn::BeginPlay()\n")
            TEXT("{\n")
            TEXT("    Super::BeginPlay();\n")
+           TEXT("    \n")
+           TEXT("    // Initialize target values from current spring arm settings\n")
+           TEXT("    if (SpringArmComponent)\n")
+           TEXT("    {\n")
+           TEXT("        TargetArmLength = SpringArmComponent->TargetArmLength;\n")
+           TEXT("        TargetRotation = SpringArmComponent->GetRelativeRotation();\n")
+           TEXT("    }\n")
+           TEXT("\n")
+           TEXT("    if (GEngine)\n")
+           TEXT("    {\n")
+           TEXT("        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT(\"CameraPawn::BeginPlay() - Starting input setup\"));\n")
+           TEXT("    }\n")
            TEXT("\n")
            TEXT("    // Add input mapping context\n")
            TEXT("    if (APlayerController* PlayerController = Cast<APlayerController>(Controller))\n")
            TEXT("    {\n")
+           TEXT("        if (GEngine)\n")
+           TEXT("        {\n")
+           TEXT("            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT(\"CameraPawn - Found PlayerController\"));\n")
+           TEXT("        }\n")
+           TEXT("\n")
            TEXT("        if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))\n")
            TEXT("        {\n")
-           TEXT("            // Load and add mapping context if it exists\n")
-           TEXT("            if (!CameraMappingContext.IsNull())\n")
+           TEXT("            if (GEngine)\n")
            TEXT("            {\n")
-           TEXT("                UInputMappingContext* LoadedContext = CameraMappingContext.LoadSynchronous();\n")
-           TEXT("                if (LoadedContext)\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT(\"CameraPawn - Found Enhanced Input Subsystem\"));\n")
+           TEXT("            }\n")
+           TEXT("\n")
+           TEXT("            // Load and add mapping context if it exists\n")
+           TEXT("            if (CameraMappingContext)\n")
+           TEXT("            {\n")
+           TEXT("                if (GEngine)\n")
            TEXT("                {\n")
-           TEXT("                    Subsystem->AddMappingContext(LoadedContext, 0);\n")
+           TEXT("                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, \n")
+           TEXT("                        TEXT(\"CameraPawn - InputMappingContext loaded successfully\"));\n")
+           TEXT("                }\n")
+           TEXT("\n")
+           TEXT("                // Use the directly loaded context\n")
+           TEXT("                if (CameraMappingContext)\n")
+           TEXT("                {\n")
+           TEXT("                    Subsystem->AddMappingContext(CameraMappingContext, 0);\n")
+           TEXT("                    if (GEngine)\n")
+           TEXT("                    {\n")
+           TEXT("                        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, \n")
+           TEXT("                            FString::Printf(TEXT(\"CameraPawn - Successfully added IMC: %s\"), *CameraMappingContext->GetName()));\n")
+           TEXT("                    }\n")
+           TEXT("                }\n")
+           TEXT("                else\n")
+           TEXT("                {\n")
+           TEXT("                    if (GEngine)\n")
+           TEXT("                    {\n")
+           TEXT("                        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - FAILED to load InputMappingContext!\"));\n")
+           TEXT("                    }\n")
            TEXT("                }\n")
            TEXT("            }\n")
+           TEXT("            else\n")
+           TEXT("            {\n")
+           TEXT("                if (GEngine)\n")
+           TEXT("                {\n")
+           TEXT("                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - CameraMappingContext is NULL!\"));\n")
+           TEXT("                }\n")
+           TEXT("            }\n")
+           TEXT("        }\n")
+           TEXT("        else\n")
+           TEXT("        {\n")
+           TEXT("            if (GEngine)\n")
+           TEXT("            {\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - Failed to get Enhanced Input Subsystem!\"));\n")
+           TEXT("            }\n")
+           TEXT("        }\n")
+           TEXT("    }\n")
+           TEXT("    else\n")
+           TEXT("    {\n")
+           TEXT("        if (GEngine)\n")
+           TEXT("        {\n")
+           TEXT("            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - No PlayerController found!\"));\n")
            TEXT("        }\n")
            TEXT("    }\n")
            TEXT("}\n")
@@ -235,26 +351,59 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("{\n")
            TEXT("    Super::SetupPlayerInputComponent(PlayerInputComponent);\n")
            TEXT("\n")
+           TEXT("    if (GEngine)\n")
+           TEXT("    {\n")
+           TEXT("        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, TEXT(\"CameraPawn::SetupPlayerInputComponent() - Setting up input bindings\"));\n")
+           TEXT("    }\n")
+           TEXT("\n")
            TEXT("    if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))\n")
            TEXT("    {\n")
-           TEXT("        // Load and bind zoom action if it exists\n")
-           TEXT("        if (!ZoomAction.IsNull())\n")
+           TEXT("        if (GEngine)\n")
            TEXT("        {\n")
-           TEXT("            UInputAction* LoadedZoomAction = ZoomAction.LoadSynchronous();\n")
-           TEXT("            if (LoadedZoomAction)\n")
+           TEXT("            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT(\"CameraPawn - Got EnhancedInputComponent\"));\n")
+           TEXT("        }\n")
+           TEXT("\n")
+           TEXT("        // Bind zoom action if it exists\n")
+           TEXT("        if (ZoomAction)\n")
+           TEXT("        {\n")
+           TEXT("            EnhancedInputComponent->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &ACameraPawn::Zoom);\n")
+           TEXT("            if (GEngine)\n")
            TEXT("            {\n")
-           TEXT("                EnhancedInputComponent->BindAction(LoadedZoomAction, ETriggerEvent::Triggered, this, &ACameraPawn::Zoom);\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, \n")
+           TEXT("                    FString::Printf(TEXT(\"CameraPawn - Successfully bound Zoom Action: %s\"), *ZoomAction->GetName()));\n")
+           TEXT("            }\n")
+           TEXT("        }\n")
+           TEXT("        else\n")
+           TEXT("        {\n")
+           TEXT("            if (GEngine)\n")
+           TEXT("            {\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - ZoomAction is NULL!\"));\n")
            TEXT("            }\n")
            TEXT("        }\n")
            TEXT("\n")
-           TEXT("        // Load and bind rotate action if it exists\n")
-           TEXT("        if (!RotateAction.IsNull())\n")
+           TEXT("        // Bind rotate action if it exists\n")
+           TEXT("        if (RotateAction)\n")
            TEXT("        {\n")
-           TEXT("            UInputAction* LoadedRotateAction = RotateAction.LoadSynchronous();\n")
-           TEXT("            if (LoadedRotateAction)\n")
+           TEXT("            EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &ACameraPawn::Rotate);\n")
+           TEXT("            if (GEngine)\n")
            TEXT("            {\n")
-           TEXT("                EnhancedInputComponent->BindAction(LoadedRotateAction, ETriggerEvent::Triggered, this, &ACameraPawn::Rotate);\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, \n")
+           TEXT("                    FString::Printf(TEXT(\"CameraPawn - Successfully bound Rotate Action: %s\"), *RotateAction->GetName()));\n")
            TEXT("            }\n")
+           TEXT("        }\n")
+           TEXT("        else\n")
+           TEXT("        {\n")
+           TEXT("            if (GEngine)\n")
+           TEXT("            {\n")
+           TEXT("                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - RotateAction is NULL!\"));\n")
+           TEXT("            }\n")
+           TEXT("        }\n")
+           TEXT("    }\n")
+           TEXT("    else\n")
+           TEXT("    {\n")
+           TEXT("        if (GEngine)\n")
+           TEXT("        {\n")
+           TEXT("            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT(\"CameraPawn - Failed to get EnhancedInputComponent!\"));\n")
            TEXT("        }\n")
            TEXT("    }\n")
            TEXT("}\n")
@@ -262,25 +411,54 @@ FString UCameraPawnCreationCommandlet::GenerateCameraPawnCpp()
            TEXT("void ACameraPawn::Zoom(const FInputActionValue& Value)\n")
            TEXT("{\n")
            TEXT("    const float ZoomValue = Value.Get<float>();\n")
+           TEXT("    ZoomInputValue = ZoomValue;\n")
            TEXT("    \n")
-           TEXT("    if (SpringArmComponent)\n")
+           TEXT("    // Determine if input is from controller (continuous) or mouse wheel (discrete)\n")
+           TEXT("    // Controller input is typically in range -1 to 1, mouse wheel is usually larger discrete values\n")
+           TEXT("    float ZoomStep = 0.0f;\n")
+           TEXT("    \n")
+           TEXT("    if (FMath::Abs(ZoomValue) <= 1.0f)\n")
            TEXT("    {\n")
-           TEXT("        float NewTargetArmLength = SpringArmComponent->TargetArmLength - (ZoomValue * ZoomSpeed);\n")
-           TEXT("        SpringArmComponent->TargetArmLength = FMath::Clamp(NewTargetArmLength, MinZoomDistance, MaxZoomDistance);\n")
+           TEXT("        // Controller input: scale to 2000 units per second at full deflection\n")
+           TEXT("        ZoomStep = ZoomValue * 2000.0f * GetWorld()->GetDeltaSeconds();\n")
+           TEXT("    }\n")
+           TEXT("    else\n")
+           TEXT("    {\n")
+           TEXT("        // Mouse wheel input: use full zoom speed for discrete steps\n")
+           TEXT("        ZoomStep = ZoomValue * ZoomSpeed;\n")
+           TEXT("    }\n")
+           TEXT("    \n")
+           TEXT("    TargetArmLength = FMath::Clamp(TargetArmLength - ZoomStep, MinZoomDistance, MaxZoomDistance);\n")
+           TEXT("    \n")
+           TEXT("    // Debug message to check if zoom input is being received\n")
+           TEXT("    if (GEngine && FMath::Abs(ZoomValue) > 0.01f)\n")
+           TEXT("    {\n")
+           TEXT("        GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Green, \n")
+           TEXT("            FString::Printf(TEXT(\"Zoom Input: %f | Target: %.1f | Step: %.1f\"), ZoomValue, TargetArmLength, ZoomStep));\n")
            TEXT("    }\n")
            TEXT("}\n")
            TEXT("\n")
            TEXT("void ACameraPawn::Rotate(const FInputActionValue& Value)\n")
            TEXT("{\n")
            TEXT("    const FVector2D RotationValue = Value.Get<FVector2D>();\n")
+           TEXT("    RotationInputValue = RotationValue;\n")
            TEXT("    \n")
-           TEXT("    if (Controller)\n")
+           TEXT("    // Update target rotation based on input\n")
+           TEXT("    float DeltaTime = GetWorld()->GetDeltaSeconds();\n")
+           TEXT("    \n")
+           TEXT("    // Apply yaw (horizontal) rotation - inverted for natural camera control\n")
+           TEXT("    TargetRotation.Yaw += RotationValue.X * RotationSpeed * DeltaTime;\n")
+           TEXT("    \n")
+           TEXT("    // Apply pitch (vertical) rotation with clamping - inverted for natural camera control\n")
+           TEXT("    float NewPitch = TargetRotation.Pitch + (RotationValue.Y * RotationSpeed * DeltaTime);\n")
+           TEXT("    TargetRotation.Pitch = FMath::Clamp(NewPitch, -80.0f, -10.0f); // Limit vertical rotation\n")
+           TEXT("    \n")
+           TEXT("    // Debug message for rotation input\n")
+           TEXT("    if (GEngine && RotationValue.Size() > 0.01f)\n")
            TEXT("    {\n")
-           TEXT("        // Add yaw (horizontal) rotation\n")
-           TEXT("        AddControllerYawInput(RotationValue.X * RotationSpeed * GetWorld()->GetDeltaSeconds());\n")
-           TEXT("        \n")
-           TEXT("        // Add pitch (vertical) rotation\n")
-           TEXT("        AddControllerPitchInput(-RotationValue.Y * RotationSpeed * GetWorld()->GetDeltaSeconds());\n")
+           TEXT("        GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, \n")
+           TEXT("            FString::Printf(TEXT(\"Rotation Input: X=%.2f Y=%.2f | Target: P=%.1f Y=%.1f\"), \n")
+           TEXT("                RotationValue.X, RotationValue.Y, TargetRotation.Pitch, TargetRotation.Yaw));\n")
            TEXT("    }\n")
            TEXT("}\n");
 }
@@ -338,26 +516,47 @@ bool UCameraPawnCreationCommandlet::CreateInputAction(const FString& ActionName,
         RotateAction = NewInputAction;
     }
 
-    // Save the input action
+    // Mark the package and register the asset
     FAssetRegistryModule::AssetCreated(NewInputAction);
     Package->MarkPackageDirty();
+    Package->SetDirtyFlag(true);
+    
+    // Ensure the package is fully loaded
+    Package->FullyLoad();
 
+    // Configure save arguments
     FSavePackageArgs SaveArgs;
     SaveArgs.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     SaveArgs.Error = GError;
     SaveArgs.SaveFlags = SAVE_NoError;
     
-    bool bSaved = UPackage::SavePackage(Package, NewInputAction, 
-        *FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension()), 
-        SaveArgs);
+    // Get the full file path
+    FString PackageFilename = FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension());
+    
+    // Ensure directory exists
+    FString Directory = FPaths::GetPath(PackageFilename);
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    if (!PlatformFile.DirectoryExists(*Directory))
+    {
+        PlatformFile.CreateDirectoryTree(*Directory);
+    }
+    
+    // Save the package
+    bool bSaved = UPackage::SavePackage(Package, NewInputAction, *PackageFilename, SaveArgs);
     
     if (bSaved)
     {
-        UE_LOG(LogCameraPawnCreation, Log, TEXT("✓ Saved input action: %s"), *ActionName);
+        UE_LOG(LogCameraPawnCreation, Warning, TEXT("✓ Successfully saved input action: %s to %s"), *ActionName, *PackageFilename);
+        
+        // Force asset registry to update
+        FAssetRegistryModule& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+        AssetRegistry.Get().AssetCreated(NewInputAction);
+        AssetRegistry.Get().SearchAllAssets(true);
     }
     else
     {
-        UE_LOG(LogCameraPawnCreation, Warning, TEXT("✗ Failed to save input action: %s"), *ActionName);
+        UE_LOG(LogCameraPawnCreation, Error, TEXT("✗ Failed to save input action: %s to %s"), *ActionName, *PackageFilename);
+        return false;
     }
 
     return true;
@@ -412,25 +611,12 @@ bool UCameraPawnCreationCommandlet::CreateInputMappingContext()
     MouseWheelUp.Action = ZoomAction;
     MouseWheelUp.Key = EKeys::MouseWheelAxis;
 
-    // Gamepad Right Stick Y for Zoom (optional)
-    FEnhancedActionKeyMapping& GamepadZoom = Mappings.AddDefaulted_GetRef();
-    GamepadZoom.Action = ZoomAction;
-    GamepadZoom.Key = EKeys::Gamepad_RightY;
+    // Mouse XY for Rotate (with right-click hold)
+    FEnhancedActionKeyMapping& MouseXY = Mappings.AddDefaulted_GetRef();
+    MouseXY.Action = RotateAction;
+    MouseXY.Key = EKeys::Mouse2D;
 
-    // Mouse X for Rotate
-    FEnhancedActionKeyMapping& MouseX = Mappings.AddDefaulted_GetRef();
-    MouseX.Action = RotateAction;
-    MouseX.Key = EKeys::MouseX;
-    UInputModifierSwizzleAxis* MouseXSwizzle = NewObject<UInputModifierSwizzleAxis>(NewMappingContext);
-    MouseXSwizzle->Order = EInputAxisSwizzle::YXZ; // Put X into Y component
-    MouseX.Modifiers.Add(MouseXSwizzle);
-
-    // Mouse Y for Rotate
-    FEnhancedActionKeyMapping& MouseY = Mappings.AddDefaulted_GetRef();
-    MouseY.Action = RotateAction;
-    MouseY.Key = EKeys::MouseY;
-
-    // Gamepad Right Stick for Rotate
+    // Xbox/Standard Gamepad Right Stick for Rotate
     FEnhancedActionKeyMapping& GamepadRotateX = Mappings.AddDefaulted_GetRef();
     GamepadRotateX.Action = RotateAction;
     GamepadRotateX.Key = EKeys::Gamepad_RightX;
@@ -450,26 +636,78 @@ bool UCameraPawnCreationCommandlet::CreateInputMappingContext()
     GamepadYDeadZone->UpperThreshold = 1.0f;
     GamepadRotateY.Modifiers.Add(GamepadYDeadZone);
 
-    // Save the mapping context
+    // PS5 Controller (GenericUSB) - Axis 3 for Zoom (with Negate)
+    FEnhancedActionKeyMapping& PS5Zoom = Mappings.AddDefaulted_GetRef();
+    PS5Zoom.Action = ZoomAction;
+    PS5Zoom.Key = FKey(TEXT("GenericUSBController_Axis3"));
+    UInputModifierNegate* PS5ZoomNegate = NewObject<UInputModifierNegate>(NewMappingContext);
+    UInputModifierDeadZone* PS5ZoomDeadZone = NewObject<UInputModifierDeadZone>(NewMappingContext);
+    PS5ZoomDeadZone->LowerThreshold = 0.2f;
+    PS5ZoomDeadZone->UpperThreshold = 1.0f;
+    PS5Zoom.Modifiers.Add(PS5ZoomNegate);
+    PS5Zoom.Modifiers.Add(PS5ZoomDeadZone);
+
+    // PS5 Controller (GenericUSB) - Axis 4 for Rotate (2D)
+    FEnhancedActionKeyMapping& PS5Rotate = Mappings.AddDefaulted_GetRef();
+    PS5Rotate.Action = RotateAction;
+    PS5Rotate.Key = FKey(TEXT("GenericUSBController_Axis4"));
+    UInputModifierDeadZone* PS5RotateDeadZone = NewObject<UInputModifierDeadZone>(NewMappingContext);
+    PS5RotateDeadZone->LowerThreshold = 0.2f;
+    PS5RotateDeadZone->UpperThreshold = 1.0f;
+    PS5Rotate.Modifiers.Add(PS5RotateDeadZone);
+
+    // Gamepad Triggers for Zoom
+    FEnhancedActionKeyMapping& GamepadZoomIn = Mappings.AddDefaulted_GetRef();
+    GamepadZoomIn.Action = ZoomAction;
+    GamepadZoomIn.Key = EKeys::Gamepad_RightTriggerAxis;
+    
+    FEnhancedActionKeyMapping& GamepadZoomOut = Mappings.AddDefaulted_GetRef();
+    GamepadZoomOut.Action = ZoomAction;
+    GamepadZoomOut.Key = EKeys::Gamepad_LeftTriggerAxis;
+    UInputModifierNegate* NegateLeft = NewObject<UInputModifierNegate>(NewMappingContext);
+    GamepadZoomOut.Modifiers.Add(NegateLeft);
+
+    // Mark the package and register the asset
     FAssetRegistryModule::AssetCreated(NewMappingContext);
     Package->MarkPackageDirty();
+    Package->SetDirtyFlag(true);
+    
+    // Ensure the package is fully loaded
+    Package->FullyLoad();
 
+    // Configure save arguments
     FSavePackageArgs SaveArgs;
     SaveArgs.TopLevelFlags = EObjectFlags::RF_Public | EObjectFlags::RF_Standalone;
     SaveArgs.Error = GError;
     SaveArgs.SaveFlags = SAVE_NoError;
     
-    bool bSaved = UPackage::SavePackage(Package, NewMappingContext, 
-        *FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension()), 
-        SaveArgs);
+    // Get the full file path
+    FString PackageFilename = FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension());
+    
+    // Ensure directory exists
+    FString Directory = FPaths::GetPath(PackageFilename);
+    IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+    if (!PlatformFile.DirectoryExists(*Directory))
+    {
+        PlatformFile.CreateDirectoryTree(*Directory);
+    }
+    
+    // Save the package
+    bool bSaved = UPackage::SavePackage(Package, NewMappingContext, *PackageFilename, SaveArgs);
     
     if (bSaved)
     {
-        UE_LOG(LogCameraPawnCreation, Log, TEXT("✓ Saved input mapping context"));
+        UE_LOG(LogCameraPawnCreation, Warning, TEXT("✓ Successfully saved input mapping context to %s"), *PackageFilename);
+        
+        // Force asset registry to update
+        FAssetRegistryModule& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+        AssetRegistry.Get().AssetCreated(NewMappingContext);
+        AssetRegistry.Get().SearchAllAssets(true);
     }
     else
     {
-        UE_LOG(LogCameraPawnCreation, Warning, TEXT("✗ Failed to save input mapping context"));
+        UE_LOG(LogCameraPawnCreation, Error, TEXT("✗ Failed to save input mapping context to %s"), *PackageFilename);
+        return false;
     }
 
     UE_LOG(LogCameraPawnCreation, Warning, TEXT("✓ Input mapping context created successfully"));
