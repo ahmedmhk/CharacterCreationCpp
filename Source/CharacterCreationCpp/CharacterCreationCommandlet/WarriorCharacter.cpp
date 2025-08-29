@@ -317,24 +317,24 @@ void AWarriorCharacter::Tick(float DeltaTime)
     // Update sprite direction
     UpdateSpriteDirection();
     
-    // Make sprite face the camera (billboard effect) - rotate only the sprite component
+    // True billboard effect - make sprite always parallel to camera view plane
     if (CameraPawnReference && SpriteComponent)
     {
-        // Get the actual camera component to look at the camera lens, not the pawn
+        // Get the actual camera component from the CameraPawn
         UCameraComponent* CameraComp = CameraPawnReference->GetCameraComponent();
         if (CameraComp)
         {
-            // Get locations
-            FVector CharacterLocation = GetActorLocation();
-            FVector CameraLocation = CameraComp->GetComponentLocation();  // Use camera component's world location
+            // True Billboard: sprite always parallel to camera view plane
+            // Get the camera's rotation (its viewing direction)
+            FRotator CameraRotation = CameraComp->GetComponentRotation();
             
-            // Calculate look-at rotation
-            FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(CharacterLocation, CameraLocation);
+            // Paper2D sprites are designed to be viewed from the side
+            // Add 90 degrees to make sprite perpendicular to camera's forward vector
+            // This presents the sprite's face to the viewer
+            FRotator BillboardRotation = FRotator(0, CameraRotation.Yaw + 90.0f, 0);
             
-            // Apply rotation ONLY to the sprite component, not the actor
-            // This preserves the actor's movement logic while achieving billboard effect
-            FRotator SpriteRotation = FRotator(0, LookAtRotation.Yaw, 0);
-            SpriteComponent->SetWorldRotation(SpriteRotation);
+            // Set sprite to face perpendicular to camera (visible to viewer)
+            SpriteComponent->SetWorldRotation(BillboardRotation);
         }
     }
 }
