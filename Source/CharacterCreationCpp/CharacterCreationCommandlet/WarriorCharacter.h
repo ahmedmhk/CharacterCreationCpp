@@ -14,7 +14,12 @@
 #include "InputActionValue.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "WarriorCharacter.generated.h"
+
+// Forward declaration
+class ACameraPawn;
 
 UCLASS()
 class CHARACTERCREATIONCPP_API AWarriorCharacter : public APaperCharacter
@@ -157,4 +162,7 @@ private:
     UPaperFlipbookComponent* SpriteComponent;
     float CurrentMoveRightValue;
     float CurrentMoveUpValue;
+    
+    // Camera reference for billboard effect
+    ACameraPawn* CameraPawnReference;
 };

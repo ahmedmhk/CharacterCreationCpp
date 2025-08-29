@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "TimerManager.h"
 #include "HAL/IConsoleManager.h"
+#include "../CameraPawnCreationCommandlet/CameraPawn.h"
 
 AWarriorCharacter::AWarriorCharacter()
 {
@@ -79,6 +80,17 @@ void AWarriorCharacter::BeginPlay()
     if (SpriteComponent)
     {
         SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -7.0f));
+    }
+    
+    // Find the CameraPawn in the world for billboard effect
+    CameraPawnReference = Cast<ACameraPawn>(UGameplayStatics::GetActorOfClass(GetWorld(), ACameraPawn::StaticClass()));
+    if (CameraPawnReference)
+    {
+        UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Found CameraPawn for billboard effect"));
+    }
+    else
+    {
+        UE_LOG(LogCharacterCreation, Warning, TEXT("✗ CameraPawn not found - billboard effect disabled"));
     }
     
     // Setup Enhanced Input
@@ -304,6 +316,27 @@ void AWarriorCharacter::Tick(float DeltaTime)
 
     // Update sprite direction
     UpdateSpriteDirection();
+    
+    // Make sprite face the camera (billboard effect) - rotate only the sprite component
+    if (CameraPawnReference && SpriteComponent)
+    {
+        // Get the actual camera component to look at the camera lens, not the pawn
+        UCameraComponent* CameraComp = CameraPawnReference->GetCameraComponent();
+        if (CameraComp)
+        {
+            // Get locations
+            FVector CharacterLocation = GetActorLocation();
+            FVector CameraLocation = CameraComp->GetComponentLocation();  // Use camera component's world location
+            
+            // Calculate look-at rotation
+            FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(CharacterLocation, CameraLocation);
+            
+            // Apply rotation ONLY to the sprite component, not the actor
+            // This preserves the actor's movement logic while achieving billboard effect
+            FRotator SpriteRotation = FRotator(0, LookAtRotation.Yaw, 0);
+            SpriteComponent->SetWorldRotation(SpriteRotation);
+        }
+    }
 }
 
 

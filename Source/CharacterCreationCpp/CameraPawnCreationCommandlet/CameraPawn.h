@@ -19,6 +19,10 @@ class CHARACTERCREATIONCPP_API ACameraPawn : public APawn
 public:
     ACameraPawn();
     virtual void Tick(float DeltaTime) override;
+    
+    // Getter for camera component (used for billboard effect)
+    UFUNCTION(BlueprintCallable, Category = "Camera")
+    UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 
 protected:
     virtual void BeginPlay() override;
