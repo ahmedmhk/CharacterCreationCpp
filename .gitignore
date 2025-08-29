@@ -88,6 +88,11 @@ Saved/
 ehthumbs.db
 Thumbs.db
 
+# Temporary texture formats
+*.tmp
+*.bak
+*_AutoSave.*
+
 # Ignore all .uasset and .umap files in certain directories
 Content/StarterContent/
 Content/Developers/
