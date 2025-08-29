@@ -2,24 +2,17 @@
 
 #include "CoreMinimal.h"
 #include "PaperCharacter.h"
-#include "PaperFlipbookComponent.h"
-#include "PaperFlipbook.h"
-#include "Components/InputComponent.h"
-#include "Engine/Engine.h"
-#include "CharacterCreationLog.h"
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
-#include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "InputAction.h"
-#include "InputMappingContext.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "WarriorCharacter.generated.h"
 
-// Forward declaration
+// Forward declarations
 class ACameraPawn;
+class UPaperFlipbook;
+class UPaperFlipbookComponent;
+class USpringArmComponent;
+class UCameraComponent;
+class UInputMappingContext;
+class UInputAction;
 
 UCLASS()
 class CHARACTERCREATIONCPP_API AWarriorCharacter : public APaperCharacter

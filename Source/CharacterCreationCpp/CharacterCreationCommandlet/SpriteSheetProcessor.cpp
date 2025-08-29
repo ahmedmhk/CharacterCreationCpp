@@ -33,7 +33,7 @@ USpriteSheetProcessor::USpriteSheetProcessor()
 
 bool USpriteSheetProcessor::ProcessSpriteSheet(const FString& TextureName, const FSpriteSheetInfo& SpriteInfo)
 {
-	FString RawAssetPath = FPaths::ProjectDir() + TEXT("RawAssets/") + TextureName + TEXT(".png");
+	FString RawAssetPath = FPaths::ProjectDir() + TEXT("RawAssets/SpriteSheets/") + TextureName + TEXT(".png");
 	FString DestinationPath = TEXT("/Game/") + TextureName;
 
 	UTexture2D* ImportedTexture = ImportTexture(RawAssetPath, DestinationPath);

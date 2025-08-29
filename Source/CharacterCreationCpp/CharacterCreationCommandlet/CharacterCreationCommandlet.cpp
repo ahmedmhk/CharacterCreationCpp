@@ -32,7 +32,7 @@ int32 UCharacterCreationCommandlet::Main(const FString& Params)
 	// Parse optional parameters with defaults
 	FSpriteSheetInfo SpriteInfo;
 	int32 Columns = DefaultColumns, Rows = DefaultRows;
-	FString SourcePath = TEXT("/Game/RawAssets/");
+	FString SourcePath = TEXT("/Game/RawAssets/SpriteSheets/");
 	FString DestPath = TEXT("/Game/Sprites/");
 
 	FParse::Value(*Params, TEXT("columns="), Columns);
@@ -186,14 +186,14 @@ void UCharacterCreationCommandlet::PrintUsage() const
 	UE_LOG(LogCharacterCreation, Warning, TEXT(""));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("Mode Parameters (choose one):"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -texture=<name>  | -t=<name>     Process single texture (without .png extension)"));
-	UE_LOG(LogCharacterCreation, Warning, TEXT("  -batch                           Process all PNG files in RawAssets directory"));
+	UE_LOG(LogCharacterCreation, Warning, TEXT("  -batch                           Process all PNG files in RawAssets/SpriteSheets directory"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT(""));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("Optional Parameters:"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -createcharacter                 Generate C++ character classes"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -dryrun                          Preview operations without executing"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -columns=<num>   | -c=<num>      Number of columns (default: %d)"), DefaultColumns);
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -rows=<num>      | -r=<num>      Number of rows (default: %d)"), DefaultRows);
-	UE_LOG(LogCharacterCreation, Warning, TEXT("  -source=<path>   | -s=<path>     Source texture path (default: /Game/RawAssets/)"));
+	UE_LOG(LogCharacterCreation, Warning, TEXT("  -source=<path>   | -s=<path>     Source texture path (default: /Game/RawAssets/SpriteSheets/)"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("  -dest=<path>     | -d=<path>     Destination path (default: /Game/Sprites/)"));
 	UE_LOG(LogCharacterCreation, Warning, TEXT(""));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("Examples:"));
@@ -235,7 +235,7 @@ void UCharacterCreationCommandlet::PrintFailure(const FString& TextureName) cons
 	UE_LOG(LogCharacterCreation, Error, TEXT(""));
 	UE_LOG(LogCharacterCreation, Error, TEXT("Troubleshooting:"));
 	UE_LOG(LogCharacterCreation, Error, TEXT("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"));
-	UE_LOG(LogCharacterCreation, Error, TEXT("1. Verify %s.png exists in RawAssets folder"), *TextureName);
+	UE_LOG(LogCharacterCreation, Error, TEXT("1. Verify %s.png exists in RawAssets/SpriteSheets folder"), *TextureName);
 	UE_LOG(LogCharacterCreation, Error, TEXT("2. Check file permissions on the PNG file"));
 	UE_LOG(LogCharacterCreation, Error, TEXT("3. Ensure PNG format is valid"));
 	UE_LOG(LogCharacterCreation, Error, TEXT("4. Verify grid dimensions match the texture"));
@@ -246,8 +246,8 @@ bool UCharacterCreationCommandlet::BatchProcessSpriteSheets(const FSpriteSheetIn
 	UE_LOG(LogCharacterCreation, Warning, TEXT(""));
 	UE_LOG(LogCharacterCreation, Warning, TEXT("=== Starting Batch Processing ==="));
 	
-	// Get the RawAssets directory path
-	FString RawAssetsPath = FPaths::ProjectDir() / TEXT("RawAssets/");
+	// Get the RawAssets/SpriteSheets directory path
+	FString RawAssetsPath = FPaths::ProjectDir() / TEXT("RawAssets/SpriteSheets/");
 	
 	// Find all PNG files in the directory
 	TArray<FString> PNGFiles;
@@ -255,7 +255,7 @@ bool UCharacterCreationCommandlet::BatchProcessSpriteSheets(const FSpriteSheetIn
 	
 	if (PNGFiles.Num() == 0)
 	{
-		UE_LOG(LogCharacterCreation, Error, TEXT("No PNG files found in RawAssets directory: %s"), *RawAssetsPath);
+		UE_LOG(LogCharacterCreation, Error, TEXT("No PNG files found in RawAssets/SpriteSheets directory: %s"), *RawAssetsPath);
 		return false;
 	}
 	

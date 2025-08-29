@@ -2,7 +2,17 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PaperFlipbookComponent.h"
+#include "PaperFlipbook.h"
+#include "Components/InputComponent.h"
 #include "Engine/Engine.h"
+#include "CharacterCreationLog.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "HAL/IConsoleManager.h"
 #include "../CameraPawnCreationCommandlet/CameraPawn.h"
@@ -35,9 +45,13 @@ AWarriorCharacter::AWarriorCharacter()
     GetCapsuleComponent()->SetCapsuleHalfHeight(34.0f);
     GetCapsuleComponent()->SetCapsuleRadius(20.0f);
 
-    // Get sprite component reference
+    // Get sprite component reference with proper validation
     SpriteComponent = GetSprite();
-    if (SpriteComponent)
+    if (!IsValid(SpriteComponent))
+    {
+        UE_LOG(LogCharacterCreation, Error, TEXT("Failed to get sprite component in WarriorCharacter constructor"));
+    }
+    else
     {
         SpriteComponent->SetRelativeRotation(FRotator(0, 0, 0)); // Align vertically with capsule
         // Position sprite so feet touch bottom of capsule
@@ -77,7 +91,7 @@ void AWarriorCharacter::BeginPlay()
     GetCapsuleComponent()->SetCapsuleSize(20.0f, 20.0f, false);
     
     // Adjust sprite position for new capsule size
-    if (SpriteComponent)
+    if (IsValid(SpriteComponent))
     {
         SpriteComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -7.0f));
     }
@@ -97,19 +111,31 @@ void AWarriorCharacter::BeginPlay()
     APlayerController* PlayerController = Cast<APlayerController>(GetController());
     if (PlayerController)
     {
-        UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-        if (Subsystem)
+        ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+        if (LocalPlayer)
         {
-            // Use DefaultMappingContext that was loaded in constructor (if available)
-            if (DefaultMappingContext)
+            UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer);
+            if (Subsystem)
             {
-                Subsystem->AddMappingContext(DefaultMappingContext, 0);
-                UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Added Input Mapping Context: IMC_PlayerInput"));
+                // Use DefaultMappingContext that was loaded in constructor (if available)
+                if (DefaultMappingContext)
+                {
+                    Subsystem->AddMappingContext(DefaultMappingContext, 0);
+                    UE_LOG(LogCharacterCreation, Warning, TEXT("✓ Added Input Mapping Context: IMC_PlayerInput"));
+                }
+                else
+                {
+                    UE_LOG(LogCharacterCreation, Warning, TEXT("✗ DefaultMappingContext is null - not loaded in constructor"));
+                }
             }
             else
             {
-                UE_LOG(LogCharacterCreation, Warning, TEXT("✗ DefaultMappingContext is null - not loaded in constructor"));
+                UE_LOG(LogCharacterCreation, Warning, TEXT("✗ Failed to get Enhanced Input Subsystem"));
             }
+        }
+        else
+        {
+            UE_LOG(LogCharacterCreation, Warning, TEXT("✗ Failed to get LocalPlayer from PlayerController"));
         }
     }
 
@@ -151,16 +177,16 @@ void AWarriorCharacter::LoadAnimationsForCharacter()
     UE_LOG(LogCharacterCreation, Warning, TEXT("=== LoadAnimationsForCharacter() called - Loading and assigning all 8 animations ==="));
     
     // Load and assign primary animation assets directly to UPROPERTY variables
-    IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle"));
-    MoveAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Move"));
-    AttackUpAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards"));
-    AttackDownAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards"));
-    AttackSideAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways"));
+    IdleAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/Idle"));
+    MoveAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/Move"));
+    AttackUpAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackUpwards"));
+    AttackDownAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackDownwards"));
+    AttackSideAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackSideways"));
     
     // Load and assign secondary attack animation variants
-    AttackUp2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards2"));
-    AttackDown2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards2"));
-    AttackSide2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways2"));
+    AttackUp2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackUpwards2"));
+    AttackDown2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackDownwards2"));
+    AttackSide2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackSideways2"));
 
     // Log assignment status
     UE_LOG(LogCharacterCreation, Warning, TEXT("IdleAnimation assigned: %s"), IdleAnimation ? TEXT("YES") : TEXT("NO"));
@@ -377,6 +403,9 @@ void AWarriorCharacter::UpdateSpriteDirection()
 
 void AWarriorCharacter::EndAttack()
 {
+    // Clear the timer handle to prevent invalid references
+    GetWorldTimerManager().ClearTimer(AttackTimerHandle);
+    
     bIsAttacking = false;
     
     // Return to appropriate animation
@@ -398,14 +427,14 @@ void AWarriorCharacter::TryLoadAnimationsForEditor()
     UE_LOG(LogCharacterCreation, Warning, TEXT("=== TryLoadAnimationsForEditor() called in constructor ==="));
     
     // Try to load primary animations with null safety
-    IdleAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Idle"));
-    MoveAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/Move"));
-    AttackUpAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards"));
-    AttackDownAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards"));
-    AttackSideAnimation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways"));
-    AttackUp2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackUpwards2"));
-    AttackDown2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackDownwards2"));
-    AttackSide2Animation = LoadObject<UPaperFlipbook>(nullptr, TEXT("/Game/Animations/AttackSideways2"));
+    IdleAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/Idle"));
+    MoveAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/Move"));
+    AttackUpAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackUpwards"));
+    AttackDownAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackDownwards"));
+    AttackSideAnimation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackSideways"));
+    AttackUp2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackUpwards2"));
+    AttackDown2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackDownwards2"));
+    AttackSide2Animation = LoadObject<UPaperFlipbook>(GetTransientPackage(), TEXT("/Game/Animations/AttackSideways2"));
     
     // Count successful loads
     int32 LoadedCount = 0;
@@ -439,9 +468,9 @@ void AWarriorCharacter::TryLoadInputAssetsForEditor()
     UE_LOG(LogCharacterCreation, Warning, TEXT("=== TryLoadInputAssetsForEditor() called in constructor ==="));
     
     // Try to load input assets for editor display (will silently fail if assets don't exist yet)
-    DefaultMappingContext = LoadObject<UInputMappingContext>(nullptr, TEXT("/Game/Input/IMC_PlayerInput"));
-    MoveAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Move"));
-    AttackAction = LoadObject<UInputAction>(nullptr, TEXT("/Game/Input/IA_Attack"));
+    DefaultMappingContext = LoadObject<UInputMappingContext>(GetTransientPackage(), TEXT("/Game/Input/IMC_PlayerInput"));
+    MoveAction = LoadObject<UInputAction>(GetTransientPackage(), TEXT("/Game/Input/IA_Move"));
+    AttackAction = LoadObject<UInputAction>(GetTransientPackage(), TEXT("/Game/Input/IA_Attack"));
     
     // Log what was loaded
     UE_LOG(LogCharacterCreation, Warning, TEXT("Constructor loaded input assets:"));
